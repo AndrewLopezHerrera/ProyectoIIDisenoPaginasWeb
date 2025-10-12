@@ -1,5 +1,5 @@
 import { Router, Context } from 'oak';
-import WebError from "../../WebError/WebError.ts";
+import WebError from "../../web_error/WebError.ts";
 
 class SeeAccounts {
 

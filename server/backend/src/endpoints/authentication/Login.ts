@@ -1,5 +1,5 @@
 import { Router, Context  } from "oak";
-import WebError from "../../WebError/WebError.ts";
+import WebError from "../../web_error/WebError.ts";
 
 /**
  * Clase para manejar las rutas de autenticación como login, recuperación de contraseña, verificación OTP y restablecimiento de contraseña.
