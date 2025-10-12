@@ -45,10 +45,28 @@ class JWTGenerator {
      * @returns La fecha de expiración del token si es válido, undefined si no tiene expiración
      * @throws WebError si el token no es válido
      */
-    public async Verify(token: string): Promise<number | undefined> {
+    public async Verify(token: string): Promise<Payload | undefined> {
         try {
             const payload = await verify(token, this.Secret);
-            return payload.exp;
+            return payload;
+        } catch (_error) {
+            throw new WebError("Invalid token", 401, "El token JWT no es válido");
+        }
+    }
+
+    /**
+     * Verifica si el token JWT pertenece a un usuario administrador
+     * @param token El token JWT a verificar
+     * @returns true si el usuario es administrador
+     * @throws WebError si el token no es válido o el usuario no es administrador
+     */
+    public async VerifyIsAdministrators(token: string): Promise<boolean | undefined> {
+        try {
+            const payload = await verify(token, this.Secret);
+            if (!payload.isAdmin) {
+                throw new WebError("Forbidden", 403, "No tiene permisos de administrador");
+            }
+            return true;
         } catch (_error) {
             throw new WebError("Invalid token", 401, "El token JWT no es válido");
         }
