@@ -5,11 +5,8 @@ import {
   Header,
   Payload,
 } from "djwt";
-import WebError from "../WebError/WebError.ts";
+import WebError from "../web_error/WebError.ts";
 
-/**
- * Clase para generar y verificar tokens JWT
- */
 class JWTGenerator {
     private Secret: CryptoKey;
 

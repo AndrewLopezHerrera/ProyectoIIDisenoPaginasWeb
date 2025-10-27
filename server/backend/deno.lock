@@ -14,7 +14,8 @@
     "jsr:@std/path@1": "1.1.2",
     "npm:@types/node@*": "24.2.0",
     "npm:oak@9": "9.0.0",
-    "npm:path-to-regexp@^6.3.0": "6.3.0"
+    "npm:path-to-regexp@^6.3.0": "6.3.0",
+    "npm:postgres@*": "3.4.7"
   },
   "jsr": {
     "@oak/commons@1.0.1": {
@@ -543,6 +544,9 @@
         "sonic-boom"
       ],
       "bin": true
+    },
+    "postgres@3.4.7": {
+      "integrity": "sha512-Jtc2612XINuBjIl/QTWsV5UvE8UHuNblcO3vVADSrKsrc6RqGX6lOW1cEo3CM2v0XG4Nat8nI+YM7/f26VxXLw=="
     },
     "prepend-http@2.0.0": {
       "integrity": "sha512-ravE6m9Atw9Z/jjttRUZ+clIXogdghyZAuWJ3qEzjT+jI/dL1ifAqhZeC5VHzQp1MSt1+jxKkFNemj/iO7tVUA=="
