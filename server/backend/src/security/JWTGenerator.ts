@@ -2,9 +2,9 @@ import {
   create,
   verify,
   getNumericDate,
-  Header,
-  Payload,
+  Header
 } from "djwt";
+import type { Payload } from "djwt";
 import WebError from "../web_error/WebError.ts";
 
 class JWTGenerator {
@@ -42,9 +42,9 @@ class JWTGenerator {
      * @returns La fecha de expiración del token si es válido, undefined si no tiene expiración
      * @throws WebError si el token no es válido
      */
-    public async Verify(token: string): Promise<Payload | undefined> {
+    public async Verify(token: string): Promise<Payload> {
         try {
-            const payload = await verify(token, this.Secret);
+            const payload = await verify<Payload>(token, this.Secret);
             return payload;
         } catch (_error) {
             throw new WebError("Invalid token", 401, "El token JWT no es válido");

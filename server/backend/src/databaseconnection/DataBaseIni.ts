@@ -1,4 +1,4 @@
-import postgres, { Sql } from "postgres";
+import { Client } from "postgresql";
 
 
 /**
@@ -6,13 +6,13 @@ import postgres, { Sql } from "postgres";
  */
 class DataBaseIni {
     private static readonly HOST: string = 'localhost';
-    private static readonly PORT: number = 5432;
-    private static readonly USER: string = 'root';
-    private static readonly PASSWORD: string = 'password';
-    private static readonly DATABASE: string = 'my_database';
-    private static connection : Sql<{}> | null = null;
+    private static readonly PORT: number = 15435;
+    private static readonly USER: string = 'user_orbita';
+    private static readonly PASSWORD: string = 'pR6#hV71zX';
+    private static readonly DATABASE: string = 'fecr_orbita';
+    private static connection : Client | null = null;
 
-    public static initConection() {
+    public static async initConection() {
         const data = {
             host: this.HOST,
             port: this.PORT,
@@ -20,10 +20,11 @@ class DataBaseIni {
             password: this.PASSWORD,
             database: this.DATABASE,
         };
-        this.connection = postgres(data);
+        this.connection = new Client(data);
+        await this.connection.connect();
     }
 
-    public static getConnection() : Sql<{}> {
+    public static getConnection() : Client {
         if (this.connection === null) {
             throw new Error("Database connection is not initialized.");
         }

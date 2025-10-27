@@ -7,6 +7,9 @@ interface User {
     borndate: Date;
     email: string;
     phone: string;
+    password: string;
+    idusertype: number;
+    idtypeident: number;
 }
 
 export type { User };
