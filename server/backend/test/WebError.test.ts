@@ -1,5 +1,5 @@
 import { assertEquals, assertExists } from "@std/assert";
-import WebError from "../src/WebError/WebError.ts";
+import WebError from "../src/web_error/WebError.ts";
 
 // Helper para evitar repetir
 function testWebError(statusCode: number, expectedName: string, message = "Test Message") {

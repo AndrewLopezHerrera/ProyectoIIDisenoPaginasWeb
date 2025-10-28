@@ -1,6 +1,7 @@
 import { assertEquals, assertExists } from "@std/assert";
 import JWTGenerator from "../src/security/JWTGenerator.ts";
-import ErrorWeb from "../src/WebError/WebError.ts";
+import ErrorWeb from "../src/web_error/WebError.ts";
+import type { Payload } from "djwt";
 
 Deno.test("JWTGenerator - Genera y verifica un token JWT válido", async () => {
   const secret = await crypto.subtle.generateKey(
@@ -15,9 +16,10 @@ Deno.test("JWTGenerator - Genera y verifica un token JWT válido", async () => {
   assertExists(token);
   assertEquals(typeof token, "string");
 
-  const exp = await jwtGen.Verify(token);
+  const exp : Payload = await jwtGen.Verify(token);
   assertExists(exp);
-  assertEquals(typeof exp, "Payload");
+  assertEquals(exp.userId, 123);
+  assertEquals(exp.role, "admin");
 });
 
 Deno.test("JWTGenerator - Verifica un token JWT inválido lanza WebError", async () => {
