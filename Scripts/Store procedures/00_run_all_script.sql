@@ -10,32 +10,110 @@
 SET search_path TO orbita;
 
 -- ==============================================
--- sp_auth_user_get_by_username_or_email
--- Descripción: Devuelve la información del usuario
--- según nombre de usuario o correo electrónico.
+-- sp_auth_user_get_by_identification
+-- Descripción: Devuelve la información completa del usuario
+-- (incluyendo contraseña y cuentas) según su identificación.
 -- ==============================================
-CREATE OR REPLACE PROCEDURE sp_auth_user_get_by_username_or_email(
-    p_input TEXT
+CREATE OR REPLACE FUNCTION sp_auth_user_get_by_identification(
+    p_identification TEXT
+)
+RETURNS TABLE (
+    identification TEXT,
+    username TEXT,
+    name TEXT,
+    lastname_one TEXT,
+    lastname_two TEXT,
+    borndate DATE,
+    email TEXT,
+    phone TEXT,
+    password TEXT,
+    idusertype INT,
+    idtypeidentification INT,
+    account_number VARCHAR,
+    balance NUMERIC,
+    currency VARCHAR,
+    status VARCHAR
 )
 LANGUAGE plpgsql
 AS $$
-DECLARE
-    v_user RECORD;
 BEGIN
-    SELECT *
-    INTO v_user
-    FROM Users
-    WHERE UserName = p_input OR Email = p_input;
+    RETURN QUERY
+    SELECT 
+        u.Identification,
+        u.UserName,
+        u.Name,
+        u.LastNameOne,
+        u.LastNameTwo,
+        u.BornDate,
+        u.Email,
+        u.Phone,
+        u.Password,
+        u.IDUser,
+        u.IDTypeIdentification,
+        a.account_number,
+        a.balance,
+        a.currency,
+        a.status
+    FROM orbita.Users u
+    LEFT JOIN orbita.accounts a ON a.user_id::TEXT = u.Identification
+    WHERE u.Identification = p_identification;
 
-    IF FOUND THEN
-        RAISE NOTICE 'Usuario encontrado: % (% %)', v_user.UserName, v_user.Name, v_user.LastNameOne;
-    ELSE
-        RAISE NOTICE 'No se encontró ningún usuario con ese nombre o correo.';
+    IF NOT FOUND THEN
+        RAISE NOTICE 'No se encontró ningún usuario con la identificación %', p_identification;
     END IF;
 EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'Error en sp_auth_user_get_by_username_or_email: %', SQLERRM;
+    RAISE NOTICE 'Error en sp_auth_user_get_by_identification: %', SQLERRM;
 END;
 $$;
+
+DROP FUNCTION IF EXISTS sp_auth_user_get_by_identification(TEXT);
+
+-- ==============================================
+-- sp_auth_user_get_by_identification
+-- Descripción:
+--   Devuelve toda la información del usuario (incluyendo la contraseña)
+--   según la identificación ingresada.
+-- ==============================================
+-- ==============================================
+-- sp_auth_user_get_by_identification (como FUNCIÓN)
+-- ==============================================
+CREATE OR REPLACE FUNCTION sp_auth_user_get_by_identification(
+    p_identification TEXT
+)
+RETURNS TABLE (
+    identification TEXT,
+    username TEXT,
+    name TEXT,
+    lastname_one TEXT,
+    lastname_two TEXT,
+    borndate DATE,
+    email TEXT,
+    phone TEXT,
+    password TEXT,
+    iduser INT,
+    idtypeidentification INT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        u.Identification,
+        u.UserName,
+        u.Name,
+        u.LastNameOne,
+        u.LastNameTwo,
+        u.BornDate,
+        u.Email,
+        u.Phone,
+        u.Password,
+        u.IDUser,
+        u.IDTypeIdentification
+    FROM orbita.Users u
+    WHERE u.Identification = p_identification;
+END;
+$$;
+
 
 
 -- ==============================================
@@ -285,11 +363,11 @@ $$;
 -- =====================================================
 -- BLOQUE: Cuentas
 -- =====================================================
+
 -- ==============================================
 -- sp_accounts_create
--- Descripción: crea una cuenta.
+-- Descripción: Crea una cuenta asociada a un usuario existente.
 -- ==============================================
-
 CREATE OR REPLACE PROCEDURE sp_accounts_create(
     p_user_id INT,
     p_account_number VARCHAR,
@@ -299,17 +377,21 @@ CREATE OR REPLACE PROCEDURE sp_accounts_create(
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    INSERT INTO orbita.Account (IBAN, IDUser, Funds, IDTypeMoney, IDTypeAccount)
+    INSERT INTO orbita.accounts (IBAN, IDUser, Funds, IDTypeMoney, IDTypeAccount)
     VALUES (p_account_number, p_user_id, p_initial_balance, 1, 1);
 
     RAISE NOTICE 'Cuenta creada correctamente para el usuario %', p_user_id;
+EXCEPTION WHEN foreign_key_violation THEN
+    RAISE NOTICE 'Error: El usuario % no existe en la tabla users.', p_user_id;
+WHEN OTHERS THEN
+    RAISE NOTICE 'Error en sp_accounts_create: %', SQLERRM;
 END;
 $$;
 
 
 -- ==============================================
 -- sp_accounts_get
--- Descripción: Devuelve la información de una cuenta por número o por ID.
+-- Descripción: Devuelve la información de una cuenta por número IBAN.
 -- ==============================================
 CREATE OR REPLACE FUNCTION sp_accounts_get(p_account_number VARCHAR)
 RETURNS TABLE (
@@ -325,17 +407,24 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY
-    SELECT a.account_id, a.user_id, a.account_number, a.balance, a.currency, a.status, a.created_at
-    FROM accounts a
-    WHERE a.account_number = p_account_number;
+    SELECT 
+        a.account_id, 
+        a.IDUser AS user_id, 
+        a.IBAN AS account_number, 
+        a.Funds AS balance, 
+        a.currency, 
+        a.status, 
+        a.created_at
+    FROM orbita.accounts a
+    WHERE a.IBAN = p_account_number;
 END;
 $$;
 
+
 -- ==============================================
--- sp_accounts_update_funds.sql
+-- sp_accounts_update_funds
 -- Descripción: Actualiza los fondos de una cuenta (depósito o retiro).
 -- ==============================================
-
 CREATE OR REPLACE PROCEDURE sp_accounts_update_funds(
     p_account_number VARCHAR,
     p_amount NUMERIC
@@ -345,28 +434,33 @@ AS $$
 DECLARE
     v_new_balance NUMERIC;
 BEGIN
-    SELECT balance + p_amount INTO v_new_balance
-    FROM accounts
-    WHERE account_number = p_account_number;
+    SELECT Funds + p_amount INTO v_new_balance
+    FROM orbita.accounts
+    WHERE IBAN = p_account_number;
+
+    IF v_new_balance IS NULL THEN
+        RAISE NOTICE 'La cuenta % no existe.', p_account_number;
+        RETURN;
+    END IF;
 
     IF v_new_balance < 0 THEN
         RAISE EXCEPTION 'Fondos insuficientes en la cuenta %', p_account_number;
     END IF;
 
-    UPDATE accounts
-    SET balance = v_new_balance
-    WHERE account_number = p_account_number;
+    UPDATE orbita.accounts
+    SET Funds = v_new_balance
+    WHERE IBAN = p_account_number;
 
-    INSERT INTO account_movements(account_number, movement_type, amount, movement_date)
+    INSERT INTO orbita.account_movements(account_number, movement_type, amount, movement_date)
     VALUES (p_account_number, CASE WHEN p_amount > 0 THEN 'DEPÓSITO' ELSE 'RETIRO' END, ABS(p_amount), NOW());
 END;
 $$;
 
--- ==============================================
--- sp_accounts_set_status.sql
--- Cambia el estado de una cuenta (por ejemplo: ACTIVA, BLOQUEADA, CERRADA).
--- ==============================================
 
+-- ==============================================
+-- sp_accounts_set_status
+-- Descripción: Cambia el estado de una cuenta (por ejemplo: ACTIVA, BLOQUEADA, CERRADA).
+-- ==============================================
 CREATE OR REPLACE PROCEDURE sp_accounts_set_status(
     p_account_number VARCHAR,
     p_new_status VARCHAR
@@ -374,15 +468,16 @@ CREATE OR REPLACE PROCEDURE sp_accounts_set_status(
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    UPDATE accounts
+    UPDATE orbita.accounts
     SET status = UPPER(p_new_status)
-    WHERE account_number = p_account_number;
+    WHERE IBAN = p_account_number;
 
     IF NOT FOUND THEN
         RAISE NOTICE 'No se encontró la cuenta %', p_account_number;
     END IF;
 END;
 $$;
+
 
 -- ==============================================
 -- sp_account_movements_list.sql
@@ -566,12 +661,6 @@ $$ LANGUAGE plpgsql;
 -- ========================================
 -- sp_movements_create
 -- Descripción: Crea un nuevo movimiento en una cuenta y actualiza los fondos.
--- Parámetros:
---   p_iban TEXT - IBAN de la cuenta afectada
---   p_amount MONEY - Monto del movimiento
---   p_detail TEXT - Descripción del movimiento
--- Retorna:
---   Texto confirmando el resultado
 -- ========================================
 CREATE OR REPLACE FUNCTION sp_movements_create(
     p_iban TEXT,
@@ -584,7 +673,7 @@ DECLARE
 BEGIN
     -- Verificar si la cuenta existe
     SELECT Funds INTO v_funds
-    FROM orbita.Account
+    FROM orbita.accounts
     WHERE IBAN = p_iban;
 
     IF v_funds IS NULL THEN
@@ -596,7 +685,7 @@ BEGIN
     VALUES (p_amount, NOW(), p_detail, p_iban, '0000000000000000'); -- Sin tarjeta asociada
 
     -- Actualizar fondos de la cuenta
-    UPDATE orbita.Account
+    UPDATE orbita.accounts
     SET Funds = Funds + p_amount
     WHERE IBAN = p_iban;
 
@@ -608,12 +697,6 @@ $$ LANGUAGE plpgsql;
 -- ========================================
 -- sp_movements_get
 -- Descripción: Obtiene los movimientos de una cuenta específica.
--- Parámetros:
---   p_iban TEXT - IBAN de la cuenta
---   p_fecha_inicio DATE (opcional)
---   p_fecha_fin DATE (opcional)
--- Retorna:
---   Lista de movimientos filtrados por fecha y cuenta
 -- ========================================
 CREATE OR REPLACE FUNCTION sp_movements_get(
     p_iban TEXT,
@@ -650,13 +733,6 @@ $$ LANGUAGE plpgsql;
 -- ========================================
 -- sp_transfer_create_internal
 -- Descripción: Realiza una transferencia interna entre cuentas.
--- Parámetros:
---   p_iban_origen TEXT - Cuenta origen
---   p_iban_destino TEXT - Cuenta destino
---   p_monto MONEY - Monto a transferir
---   p_detalle TEXT - Descripción de la transferencia
--- Retorna:
---   Texto confirmando el resultado
 -- ========================================
 CREATE OR REPLACE FUNCTION sp_transfer_create_internal(
     p_iban_origen TEXT,
@@ -669,11 +745,11 @@ DECLARE
     v_saldo_origen MONEY;
 BEGIN
     -- Validar existencia de cuentas
-    SELECT Funds INTO v_saldo_origen FROM orbita.Account WHERE IBAN = p_iban_origen;
+    SELECT Funds INTO v_saldo_origen FROM orbita.accounts WHERE IBAN = p_iban_origen;
 
     IF v_saldo_origen IS NULL THEN
         RETURN ' Error: la cuenta origen no existe.';
-    ELSIF (SELECT COUNT(*) FROM orbita.Account WHERE IBAN = p_iban_destino) = 0 THEN
+    ELSIF (SELECT COUNT(*) FROM orbita.accounts WHERE IBAN = p_iban_destino) = 0 THEN
         RETURN ' Error: la cuenta destino no existe.';
     ELSIF v_saldo_origen < p_monto THEN
         RETURN ' Error: saldo insuficiente.';
@@ -688,8 +764,8 @@ BEGIN
     VALUES (p_monto, NOW(), CONCAT('Transferencia desde ', p_iban_origen, ' - ', p_detalle), p_iban_destino, '0000000000000000');
 
     -- Actualizar saldos
-    UPDATE orbita.Account SET Funds = Funds - p_monto WHERE IBAN = p_iban_origen;
-    UPDATE orbita.Account SET Funds = Funds + p_monto WHERE IBAN = p_iban_destino;
+    UPDATE orbita.accounts SET Funds = Funds - p_monto WHERE IBAN = p_iban_origen;
+    UPDATE orbita.accounts SET Funds = Funds + p_monto WHERE IBAN = p_iban_destino;
 
     RETURN ' Transferencia interna completada correctamente.';
 END;
@@ -709,6 +785,10 @@ $$ LANGUAGE plpgsql;
 -- Retorna:
 --   Resultado textual y bandera booleana
 -- ========================================
+-- ========================================
+-- sp_bank_validate_account
+-- Descripción: Valida que una cuenta pertenezca a un titular.
+-- ========================================
 CREATE OR REPLACE FUNCTION sp_bank_validate_account(
     p_iban TEXT,
     p_identificacion TEXT
@@ -725,11 +805,12 @@ BEGIN
             ELSE ' Cuenta no encontrada o no pertenece al titular.'
         END AS resultado,
         COUNT(*) > 0 AS valido
-    FROM orbita.Account
+    FROM orbita.accounts
     WHERE IBAN = p_iban
-      AND IDUser = p_identificacion;
+      AND IDUser::TEXT = p_identificacion;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- =====================================================
 -- BLOQUE: Ejecucion
