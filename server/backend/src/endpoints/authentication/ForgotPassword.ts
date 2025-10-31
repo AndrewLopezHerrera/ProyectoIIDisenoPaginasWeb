@@ -1,16 +1,19 @@
 import { Router, Context } from "oak";
 import WebError from "../../web_error/WebError.ts";
+import AuthenticationManager from "../../logic/AuthenticationManager.ts";
 
 /**
  * Clase para manejar la ruta de recuperación de contraseña.
  */
 class ForgotPassword {
+    private Manager: AuthenticationManager;
 
     /**
      * El método constructor recibe un enrutador de Oak para definir la ruta de recuperación de contraseña.
      * @param router El enrutador del API.
      */
-    public constructor(router: Router) {
+    public constructor(router: Router, manager: AuthenticationManager) {
+        this.Manager = manager;
         router.post("/api/v1/auth/forgot-password", async (context: Context) => {
             try {
                 const body = await context.request.body();
@@ -19,8 +22,8 @@ class ForgotPassword {
                 const { email } = body.value;
                 if (!email)
                     throw new WebError("Missing fields", 400, "Faltan campos obligatorios");
-                // Handle forgot password logic here
-                context.response.body = { message: "Password reset link sent" };
+                await this.Manager.RecoverPassword(email);
+                context.response.body = { message: "Se ha enviado un enlace de restablecimiento de contraseña a su correo" };
 
             } catch (error: WebError | unknown) {
                 if (error instanceof WebError) {
