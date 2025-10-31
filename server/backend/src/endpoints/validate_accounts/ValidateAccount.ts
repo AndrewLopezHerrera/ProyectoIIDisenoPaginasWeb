@@ -1,9 +1,12 @@
 import { Router, Context } from 'oak';
 import WebError from "../../web_error/WebError.ts";
+import AccountManager from "../../logic/AccountManeger.ts";
 
 class ValidateAccount {
-    
-    public constructor(router: Router){
+    private Manager: AccountManager;
+
+    public constructor(router: Router, manager: AccountManager){
+        this.Manager = manager;
         router.post('/api/v1/accounts/validate', async (ctx: Context) => {
             try {
                 const authHeader = ctx.request.headers.get("Authorization");
@@ -15,8 +18,8 @@ class ValidateAccount {
                 const { accountNumber, bankCode } = body;
                 if (!accountNumber || !bankCode)
                     throw new WebError("Missing parameters", 400, "Faltan parámetros obligatorios en la solicitud");
-                // Handle account validation logic here
-                ctx.response.body = { message: "Account validated successfully" };
+                const isValid = await this.Manager.ValidateAccountExists(accountNumber, token);
+                ctx.response.body = { message: "Account validated successfully", data: { isValid } };
 
             } catch (error: WebError | unknown) {
                 if (error instanceof WebError) {

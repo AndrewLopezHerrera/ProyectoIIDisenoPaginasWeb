@@ -1,10 +1,13 @@
 import { Router, Context } from 'oak';
 import WebError from "../../web_error/WebError.ts";
 import type { Account } from "../../interfaces/Account.ts";
+import AccountManager from "../../logic/AccountManeger.ts";
 
 class CreateAccount {
+    private Manager: AccountManager;
 
-    public constructor(router: Router) {
+    public constructor(router: Router, manager: AccountManager) {
+        this.Manager = manager;
         router.post("/api/v1/accounts", async (context: Context) => {
             try {
                 const body = await context.request.body();
@@ -13,9 +16,8 @@ class CreateAccount {
                 const datos: Account = body.value;
                 if (!datos.iduser || !datos.funds || !datos.idtypeaccount || !datos.idtypemoney)
                     throw new WebError("Missing fields", 400, "Faltan campos obligatorios");
-                // Handle account creation logic here
-                context.response.body = { message: "Account created successfully" };
-
+                 await this.Manager.CreateAccount(datos);
+                context.response.body = { message: "Se ha creado exitosamente la cuenta" };
             } catch (error: WebError | unknown) {
                 if (error instanceof WebError) {
                     context.response.body = { error: error.ToJSON() };

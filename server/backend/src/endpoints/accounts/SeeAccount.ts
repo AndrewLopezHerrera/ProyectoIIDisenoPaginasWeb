@@ -1,9 +1,12 @@
 import { Context, Router } from "oak";
 import WebError from "../../web_error/WebError.ts";
+import AccountManager from "../../logic/AccountManeger.ts";
 
 class SeeAccount {
+    private Manager: AccountManager;
 
-    public constructor(router: Router) {
+    public constructor(router: Router, manager: AccountManager) {
+        this.Manager = manager;
         router.get("/api/v1/accounts/:accountId", async (context: Context) => {
             try {
                 const authHeader = context.request.headers.get("Authorization");
@@ -14,8 +17,8 @@ class SeeAccount {
                     throw new WebError("Unauthorized", 401, "Falta el token de autorización");
                 }
                 const token = authHeader.split(" ")[1];
-                // Handle see account logic here
-                context.response.body = { message: "Account details" };
+                const account = await this.Manager.SeeAccount(accountId, token);
+                context.response.body = { message: "Cuenta extraída", data: account };
 
             } catch (error: WebError | unknown) {
                 if (error instanceof WebError) {

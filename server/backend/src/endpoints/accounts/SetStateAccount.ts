@@ -1,9 +1,12 @@
 import { Context, Router } from "oak";
 import WebError from "../../web_error/WebError.ts";
+import AccountManager from "../../logic/AccountManeger.ts";
 
 class SetStateAccount {
+    private Manager: AccountManager;
 
-    public constructor(router: Router) {
+    public constructor(router: Router, manager: AccountManager) {
+        this.Manager = manager;
         router.post("/api/v1/accounts/:accountId/status", async (context: Context) => {
             try {
                 const authHeader = context.request.headers.get("Authorization");
@@ -18,10 +21,10 @@ class SetStateAccount {
                 if (body.type !== "json")
                     throw new WebError("Invalid request", 400, "Cuerpo de solicitud no es JSON");
                 const { status } = body.value;
-                if (typeof status !== "boolean")
-                    throw new WebError("Invalid status", 400, "El estado debe ser booleano");
-                // Handle set state account logic here
-                context.response.body = { message: "Account status updated successfully" };
+                if (typeof status !== "string")
+                    throw new WebError("Invalid status", 400, "El estado debe ser una cadena");
+                await this.Manager.SetAccountStatus(accountId, status, token);
+                context.response.body = { message: "Estado de la cuenta actualizado exitosamente" };
 
             } catch (error: WebError | unknown) {
                 if (error instanceof WebError) {
