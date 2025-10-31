@@ -1,5 +1,6 @@
 import CardsCRUD from "../databaseconnection/CardsCRUD.ts";
 import { Card } from "../interfaces/Card.ts";
+import { Movement } from "../interfaces/Movement.ts";
 import Authorizer from "../security/Authorizer.ts";
 import WebError from "../web_error/WebError.ts";
 
@@ -103,6 +104,23 @@ class CardsManager {
             card.cvv = "";
         });
         return cards;
+    }
+
+    /**
+     * Obtiene los movimientos de una tarjeta en un rango de fechas.
+     * @param numberCard El número de la tarjeta.
+     * @param startDate El inicio del rango de fechas.
+     * @param endDate El fin del rango de fechas.
+     * @param jwtToken Token JWT del usuario que realiza la operación.
+     * @returns Los movimientos de la tarjeta.
+     */
+    public async GetCardMovements(numberCard: string, startDate: Date, endDate: Date, jwtToken: string) : Promise<Movement[]>{
+        const card = await this.CardsConnection.GetCard(numberCard);
+        if(!await this.AuthorizerUsers.IsAdministrador(jwtToken) && !await this.AuthorizerUsers.IsOwner(jwtToken, card.iduser)) {
+            throw new WebError("No tienes permisos para ver los movimientos de esta tarjeta.", 403);
+        }
+        const movements = await this.CardsConnection.GetCardMovements(numberCard, startDate, endDate);
+        return movements;
     }
 }
 
