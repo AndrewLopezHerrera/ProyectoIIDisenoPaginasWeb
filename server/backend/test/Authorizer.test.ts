@@ -150,3 +150,23 @@ Deno.test("Authorizer - IsOwner identifica correctamente al propietario", async 
   assertExists(isOwner);
   assertEquals(isOwner, true);
 });
+
+Deno.test("Authorizer - Verifica si es capaz de devolver el usuario propietario", async () => {
+  const secret = await crypto.subtle.generateKey(
+    { name: "HMAC", hash: "SHA-512" },
+    true,
+    ["sign", "verify"],
+  );
+  const jwtGen = new JWTGenerator(secret);
+  const authorizer = new Authorizer(jwtGen);
+
+  const ownerPayload = {
+    id: "owner123",
+    email: "owner123@example.com",
+    role: "owner"
+  };
+  const token = await jwtGen.Generate(ownerPayload);
+  const userId = await authorizer.GetUserIdFromToken(token);
+  assertExists(userId);
+  assertEquals(userId, ownerPayload.id);
+});

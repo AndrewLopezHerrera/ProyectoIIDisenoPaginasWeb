@@ -71,6 +71,24 @@ class Authorizer {
         const hashedPassword = await hash(password, salt);
         return hashedPassword;
     }
+
+    /**
+     * Obtiene los datos del token JWT.
+     * @param jwt El token JWT.
+     * @returns Los datos del payload del token.
+     */
+    private async GetDataFromToken(jwt: string): Promise<Payload> {
+        const payload = await this.jwtGenerator.Verify(jwt);
+        if(!payload) {
+            throw new WebError("Token inválido", 401);
+        }
+        return payload;
+    }
+
+    public async GetUserIdFromToken(jwt: string): Promise<string> {
+        const payload = await this.GetDataFromToken(jwt);
+        return payload.id as string;
+    }
 }
 
 export default Authorizer;

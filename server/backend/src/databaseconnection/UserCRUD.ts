@@ -16,6 +16,19 @@ class UserCRUD {
     }
 
     /**
+     * Obtiene un usuario por su nombre de usuario o correo electrónico.
+     * @param username El nombre de usuario o correo electrónico del usuario.
+     * @returns El usuario correspondiente.
+     */
+    public async GetUser(username: string) : Promise<User>{
+        const result = await this.Connection.queryObject<User>(
+            "CALL orbita.sp_auth_user_get_by_username_or_email($1);",
+            [username]
+        );
+        return result.rows[0];
+    }
+
+    /**
      * Crea un nuevo usuario en la base de datos.
      * @param data Los datos del usuario a crear.
      */

@@ -31,8 +31,8 @@ class AccountCRUD {
         await this.Connection.queryObject("CALL public.sp_set_account_status($1, $2)", [iban, status]);
     }
 
-    public async SeeAccount(idUsuario: string, iban: string): Promise<Account> {
-        const result = await this.Connection.queryObject<Account>("SELECT orbita.sp_accounts_list($1)", [idUsuario]);
+    public async SeeAccount(iban: string): Promise<Account> {
+        const result = await this.Connection.queryObject<Account>("SELECT orbita.sp_accounts_get($1)", [iban]);
         const accounts = result.rows;
         const account = accounts.find(acc => acc.iban === iban);
         if (!account) {

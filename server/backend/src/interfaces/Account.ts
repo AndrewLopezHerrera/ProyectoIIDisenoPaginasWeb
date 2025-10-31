@@ -1,9 +1,9 @@
 interface Account {
     iban: string;
     funds: number;
-    iduser: number;
-    idtypemoney: number;
-    idtypeaccount: number;
+    iduser: string;
+    idtypemoney: string;
+    idtypeaccount: string;
 }
 
 export type { Account };

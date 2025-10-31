@@ -19,6 +19,8 @@
     "jsr:@std/media-types@1": "1.1.0",
     "jsr:@std/path@1": "1.1.2",
     "jsr:@std/path@^1.0.8": "1.1.2",
+    "jsr:@upyo/core@0.3": "0.3.0",
+    "jsr:@upyo/resend@0.3": "0.3.0",
     "npm:@types/node@*": "24.2.0",
     "npm:oak@9": "9.0.0",
     "npm:path-to-regexp@^6.3.0": "6.3.0",
@@ -81,6 +83,12 @@
       "dependencies": [
         "jsr:@std/internal@^1.0.10"
       ]
+    },
+    "@upyo/core@0.3.0": {
+      "integrity": "deeeb5ca1260a7bba48475e79c35c6433a5ea253baa3bd04d34c20ca90ff608d"
+    },
+    "@upyo/resend@0.3.0": {
+      "integrity": "a2d6ec5adbb9a18202511ee82e0925acfc7fc14067ff8ab97cb2cb4c64219432"
     }
   },
   "npm": {
@@ -819,6 +827,8 @@
       "jsr:@db/postgres@*",
       "jsr:@db/postgres@~0.19.5",
       "jsr:@std/assert@1",
+      "jsr:@upyo/core@0.3",
+      "jsr:@upyo/resend@0.3",
       "npm:oak@9"
     ]
   }

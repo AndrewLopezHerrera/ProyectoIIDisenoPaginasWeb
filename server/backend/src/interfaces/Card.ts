@@ -1,9 +1,9 @@
 interface Card {
     numbercard: string;
     iban: string;
-    iduser: number;
-    pin: number;
-    cvv: number;
+    iduser: string;
+    pin: string;
+    cvv: string;
     expdate: Date;
 }
 

@@ -8,8 +8,8 @@ class AuthenticationCRUD {
         this.Connection = connection;
     }
 
-    public async Login(username: string): Promise<User> {
-        const result = await this.Connection.queryObject<User>("SELECT orbita.fn_validate_user_credentials($1)", [username]);
+    public async Login(username: string, password: string): Promise<User> {
+        const result = await this.Connection.queryObject<User>("CALL orbita.sp_auth_login($1, $2)", [username, password]);
         return result.rows[0];
     }
 
