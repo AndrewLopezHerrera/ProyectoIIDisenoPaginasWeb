@@ -20,12 +20,7 @@ class Authorizer {
      * @param inputPassword La contraseña ingresada por el usuario.
      * @returns Un token JWT si las credenciales son válidas.
      */
-    public async Login(user: User, inputPassword: string): Promise<string> {
-        const isPasswordValid = await compare(inputPassword, user.password);
-        if (!isPasswordValid) {
-            throw new WebError("Cuenta o contraseña incorrecta", 401);
-        }
-
+    public async Login(user: User): Promise<string> {
         const payload: Payload = {
             id: user.identification,
             email: user.email,

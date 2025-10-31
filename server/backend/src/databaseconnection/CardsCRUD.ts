@@ -15,12 +15,12 @@ class CardsCRUD {
         );
     }
 
-    public async GetCard(numberCard: string){
+    public async GetCard(numberCard: string) : Promise<Card> {
         const result = await this.Connection.queryObject<Card>(
             "SELECT * FROM orbita.sp_cards_get($1)",
             [numberCard]
         );
-        return result;
+        return result.rows[0];
     }
 
     public async GetCards(identification: string){

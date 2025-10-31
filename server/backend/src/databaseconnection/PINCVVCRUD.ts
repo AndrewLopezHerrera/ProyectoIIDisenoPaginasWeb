@@ -8,7 +8,7 @@ class PINCVVCRUD {
     }
 
     public async GenerateOTPPINCVV(identification: string, code: number, minutes: number): Promise<void> {
-        this.Connection.queryObject<void>(
+        await this.Connection.queryObject<void>(
             "CALL orbita.sp_otp_create($1, $2, $3);",
             [identification, code, minutes]
         );

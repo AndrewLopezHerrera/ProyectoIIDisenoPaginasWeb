@@ -88,7 +88,10 @@
       "integrity": "deeeb5ca1260a7bba48475e79c35c6433a5ea253baa3bd04d34c20ca90ff608d"
     },
     "@upyo/resend@0.3.0": {
-      "integrity": "a2d6ec5adbb9a18202511ee82e0925acfc7fc14067ff8ab97cb2cb4c64219432"
+      "integrity": "a2d6ec5adbb9a18202511ee82e0925acfc7fc14067ff8ab97cb2cb4c64219432",
+      "dependencies": [
+        "jsr:@upyo/core"
+      ]
     }
   },
   "npm": {

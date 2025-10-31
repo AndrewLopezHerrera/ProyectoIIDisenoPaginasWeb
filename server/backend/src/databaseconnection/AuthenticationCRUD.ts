@@ -28,6 +28,10 @@ class AuthenticationCRUD {
         }
         return false;
     }
+
+    public async ResetPassword(identification: string, newPassword: string): Promise<void> {
+        await this.Connection.queryObject("CALL orbita.sp_auth_change_password($1, $2)", [identification, newPassword]);
+    }
 }
 
 export default AuthenticationCRUD;
