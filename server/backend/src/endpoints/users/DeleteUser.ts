@@ -1,9 +1,12 @@
 import { Router, Context } from 'oak';
 import WebError from "../../web_error/WebError.ts";
+import UserManager from "../../logic/UserManager.ts";
 
 class DeleteUser {
+    private Manager: UserManager;
 
-    public constructor(router: Router){
+    public constructor(router: Router, manager: UserManager) {
+        this.Manager = manager;
         router.delete("/api/v1/users/:id", async (context: Context) => {
             try {
                 const id = context.params.id;
@@ -12,10 +15,9 @@ class DeleteUser {
                     throw new WebError("Unauthorized", 401, "Falta el token de autorización");
                 }
                 const token = authHeader.split(" ")[1];
-
                 if (!id)
                     throw new WebError("Missing user ID", 400, "Falta el ID de usuario");
-                
+                await this.Manager.DeleteUser(id, token);
                 context.response.body = { message: `User with ID: ${id} deleted successfully` };
 
             } catch (error: WebError | unknown) {

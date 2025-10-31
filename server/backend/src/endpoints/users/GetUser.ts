@@ -1,9 +1,12 @@
 import { Router, Context } from 'oak';
 import WebError from "../../web_error/WebError.ts";
+import UserManager from "../../logic/UserManager.ts";
 
 class GetUser {
+    private Manager: UserManager;
 
-    public constructor(router: Router){
+    public constructor(router: Router, manager: UserManager){
+        this.Manager = manager;
         router.get("/api/v1/users/:identification", async (context: Context) => {
             try {
                 const identification = context.params.identification;
@@ -16,8 +19,8 @@ class GetUser {
                     throw new WebError("Invalid request", 400, "Cuerpo de solicitud no es JSON");
                 if (!identification)
                     throw new WebError("Missing user ID", 400, "Falta el ID de usuario");
-                // Handle get user logic here
-                context.response.body = { message: `User data for ID: ${identification}` };
+                const user = await this.Manager.GetUser(identification, token);
+                context.response.body = { user };
 
             } catch (error: WebError | unknown) {
                 if (error instanceof WebError) {

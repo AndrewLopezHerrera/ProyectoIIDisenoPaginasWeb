@@ -1,4 +1,5 @@
 import { Client } from "postgresql";
+import { Transfer } from "../interfaces/Transfer.ts";
 
 class TransferCRUD {
     private Connection: Client;
@@ -7,10 +8,10 @@ class TransferCRUD {
         this.Connection = connection;
     }
 
-    public async DoInternalTransfer(origin: string, destination: string, amount: number, detail: string): Promise<void> {
+    public async DoInternalTransfer(transfer: Transfer): Promise<void> {
         await this.Connection.queryObject<void>(
             "CALL orbita.sp_transfer_between_accounts($1, $2, $3, $4);",
-            [origin, destination, amount, detail]
+            [transfer.from, transfer.to, transfer.amount, transfer.details || null]
         );
     }
 }

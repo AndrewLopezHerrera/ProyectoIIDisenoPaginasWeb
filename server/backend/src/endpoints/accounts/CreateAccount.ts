@@ -1,7 +1,7 @@
 import { Router, Context } from 'oak';
 import WebError from "../../web_error/WebError.ts";
 import type { Account } from "../../interfaces/Account.ts";
-import AccountManager from "../../logic/AccountManeger.ts";
+import AccountManager from "../../logic/AccountManager.ts";
 
 class CreateAccount {
     private Manager: AccountManager;

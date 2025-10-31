@@ -1,6 +1,6 @@
 import { Router, Context } from 'oak';
 import WebError from "../../web_error/WebError.ts";
-import AccountManager from "../../logic/AccountManeger.ts";
+import AccountManager from "../../logic/AccountManager.ts";
 
 class ValidateAccount {
     private Manager: AccountManager;

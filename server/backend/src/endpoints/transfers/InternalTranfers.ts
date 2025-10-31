@@ -1,9 +1,13 @@
 import { Router, Context } from 'oak';
 import WebError from "../../web_error/WebError.ts";
+import TransferManager from "../../logic/TransferManager.ts";
+import { Transfer } from "../../interfaces/Transfer.ts";
 
 class InternalTransfers {
-    
-    public constructor(router: Router){
+    private Manager: TransferManager;
+
+    public constructor(router: Router, manager: TransferManager) {
+        this.Manager = manager;
         router.post("/api/v1/transfers/internal", async (context: Context) => {
             try {
                 const authHeader = context.request.headers.get("Authorization");
@@ -14,10 +18,10 @@ class InternalTransfers {
                 const body = await context.request.body();
                 if (body.type !== "json")
                     throw new WebError("Invalid request", 400, "Cuerpo de solicitud no es JSON");
-                const { fromAccountId, toAccountId, amount } = body.value;
-                if (!fromAccountId || !toAccountId || !amount)
+                const transfer: Transfer = body.value;
+                if (!transfer.from || !transfer.to || !transfer.amount)
                     throw new WebError("Missing parameters", 400, "Faltan parámetros en la solicitud");
-                // Handle internal transfer logic here
+                await this.Manager.DoInternalTransfer(transfer, token);
                 context.response.body = { message: "Internal transfer successful" };
 
             } catch (error: WebError | unknown) {
