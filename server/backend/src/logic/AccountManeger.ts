@@ -90,7 +90,11 @@ class AccountManager {
      * @param accountNumber Número de la cuenta a validar.
      * @returns True si la cuenta existe, false en caso contrario.
      */
-    public async ValidateAccountExists(accountNumber: string): Promise<boolean> {
+    public async ValidateAccountExists(accountNumber: string, jwt: string): Promise<boolean> {
+        const account = await this.Connection.SeeAccount(accountNumber);
+        if(!await this.AuthorizerAccounts.IsAdministrador(jwt) && !await this.AuthorizerAccounts.IsOwner(jwt, account.iduser)){
+            throw new WebError("No autorizado a realizar esta acción", 403);
+        }
         return await this.ValidatorAccounts.ValidateAccountExistence(accountNumber);
     }
 }
