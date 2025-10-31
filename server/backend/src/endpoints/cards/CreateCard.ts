@@ -16,8 +16,8 @@ class CreateCard {
                 const token = authHeader.split(" ")[1];
                 const body = ctx.request.body({ type: "json" });
                 const card = await body.value;
-                this.Manager.CreateCard(token, card);
-                ctx.response.body = { message: "Card created successfully" };
+                await this.Manager.CreateCard(token, card);
+                ctx.response.body = { message: "Se ha creado la tarjeta correctamente" };
 
             } catch (error: WebError | unknown) {
                 if (error instanceof WebError) {

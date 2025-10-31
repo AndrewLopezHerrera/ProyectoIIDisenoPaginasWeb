@@ -1,9 +1,12 @@
 import { Router, Context } from 'oak';
 import WebError from "../../web_error/WebError.ts";
+import PINCVVManager from "../../logic/PINCVVManager.ts";
 
 class VerifyOTPPinCvv {
+    private Manager: PINCVVManager
 
-    public constructor(router: Router){
+    public constructor(router: Router, manager: PINCVVManager){
+        this.Manager = manager;
         router.post('/api/v1/cards/:cardId/view-details', async (ctx: Context) => {
             try {
                 const authHeader = ctx.request.headers.get("Authorization");
@@ -11,11 +14,12 @@ class VerifyOTPPinCvv {
                     throw new WebError("Unauthorized", 401, "Falta el token de autorización");
                 }
                 const token = authHeader.split(" ")[1];
-                const cardId = ctx.params.cardId;
-                if (!cardId)
+                const body = ctx.request.body({ type: "json" });
+                const { otp, cardID } = await body.value;
+                if (!cardID)
                     throw new WebError("Missing parameters", 400, "Falta el ID de la tarjeta en la solicitud");
-                // Handle OTP PIN/CVV verification logic here
-                ctx.response.body = { message: `OTP PIN/CVV for card ${cardId} verified successfully` };
+                const card = await this.Manager.ValidateOTP(cardID, otp, token);
+                ctx.response.body = { card };
 
             } catch (error: WebError | unknown) {
                 if (error instanceof WebError) {

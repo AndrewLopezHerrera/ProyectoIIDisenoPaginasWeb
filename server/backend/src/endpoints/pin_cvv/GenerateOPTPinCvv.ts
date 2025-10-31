@@ -1,9 +1,12 @@
 import { Router, Context } from 'oak';
 import WebError from "../../web_error/WebError.ts";
+import PINCVVManager from "../../logic/PINCVVManager.ts";
 
 class GenerateOPTPinCvv {
+    private Manager: PINCVVManager
 
-    public constructor(router: Router){
+    public constructor(router: Router, manager: PINCVVManager) {
+        this.Manager = manager;
         router.post('/api/v1/cards/:cardId/otp', async (ctx: Context) => {
             try {
                 const authHeader = ctx.request.headers.get("Authorization");
@@ -14,7 +17,7 @@ class GenerateOPTPinCvv {
                 const cardId = ctx.params.cardId;
                 if (!cardId)
                     throw new WebError("Missing parameters", 400, "Falta el ID de la tarjeta en la solicitud");
-                // Handle OTP PIN/CVV generation logic here
+                await this.Manager.GenerateOTP(token, cardId);
                 ctx.response.body = { message: `OTP PIN/CVV for card ${cardId} generated successfully` };
 
             } catch (error: WebError | unknown) {
