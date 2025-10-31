@@ -8,10 +8,10 @@ class CardsCRUD {
         this.Connection = connection;
     }
 
-    public async CreateCard(numberCard: string, iban: string, identification: string, pin: string, cvv: string, expDate: Date): Promise<void> {
+    public async CreateCard(card: Card): Promise<void> {
         await this.Connection.queryObject<Card>(
             "CALL orbita.sp_cards_create($1, $2, $3, $4, $5, $6)",
-            [numberCard, iban, identification, pin, cvv, expDate]
+            [card.numbercard, card.iban, card.iduser, card.pin, card.cvv, card.expdate]
         );
     }
 
