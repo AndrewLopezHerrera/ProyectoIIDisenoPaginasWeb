@@ -57,29 +57,13 @@ class AuthenticationManager {
      * @param username El nombre de usuario o correo electrónico del usuario.
      * @param otp El código OTP enviado al correo electrónico del usuario.
      */
-    public ResetPassword = async (username: string, otp: string) => {
+    public ResetPassword = async (username: string, newPassword: string, otp: string) => {
         const user = await this.UserConnection.GetUser(username);
         const isValid = await this.Authentication.VerifyOTP(user.identification, otp);
         if (!isValid) {
             throw new WebError("OTP inválido", 401);
         }
-        const newPassword = this.GenerateTempPassword(12);
         await this.Authentication.ResetPassword(user.identification, newPassword);
-    }
-
-    /**
-     * Genera una contraseña temporal.
-     * @param length La longitud de la contraseña.
-     * @returns La contraseña temporal generada.
-     */
-    private GenerateTempPassword = (length: number) : string => {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?';
-        let tempPassword = '';
-        for (let i = 0; i < length; i++) {
-            const randomIndex = Math.floor(Math.random() * chars.length);
-            tempPassword += chars[randomIndex];
-        }
-        return tempPassword;
     }
 
     /**
