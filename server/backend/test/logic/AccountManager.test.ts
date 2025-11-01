@@ -1,5 +1,4 @@
 import { assertEquals, assertRejects } from "@std/assert";
-import { stub } from "mocking";
 import AccountManager from "../../src/logic/AccountManager.ts";
 import AccountCRUD from "../../src/databaseconnection/AccountCRUD.ts";
 import Authorizer from "../../src/security/Authorizer.ts";

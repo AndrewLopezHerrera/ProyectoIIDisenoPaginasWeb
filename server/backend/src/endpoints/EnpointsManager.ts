@@ -20,16 +20,39 @@ import ValidateAccount from "./validate_accounts/ValidateAccount.ts";
 import DataBaseIni from "../databaseconnection/DataBaseIni.ts";
 import AuthenticationCRUD from "../databaseconnection/AuthenticationCRUD.ts";
 import AuthenticationManager from "../logic/AuthenticationManager.ts";
+import Authorizer from "../security/Authorizer.ts";
+import AccountCRUD from "../databaseconnection/AccountCRUD.ts";
+import CardsCRUD from "../databaseconnection/CardsCRUD.ts";
+import PINCVVCRUD from "../databaseconnection/PINCVVCRUD.ts";
+import UserCRUD from "../databaseconnection/UserCRUD.ts";
+import ValidateAccountCRUD from "../databaseconnection/ValidateAccountCRUD.ts";
+import TransferCRUD from "../databaseconnection/TransferCRUD.ts";
+import EmailManager from "../logic/EmailManager.ts";
+import UserManager from "../logic/UserManager.ts";
+import CreateUser from "./users/CreateUser.ts";
+import AccountManager from "../logic/AccountManager.ts";
+import CardsManager from "../logic/CardsManager.ts";
+import TransferManager from "../logic/TransferManager.ts";
+import PINCVVManager from "../logic/PINCVVManager.ts";
 
 class EndpointsManager {
     private App: Application;
     private Router: Router;
     private Port : number = 8080;
+    private AuthorizerUsers: Authorizer;
+    private AccountConnection: AccountCRUD = new AccountCRUD(DataBaseIni.getConnection());
+    private AuthenticationConnection: AuthenticationCRUD = new AuthenticationCRUD(DataBaseIni.getConnection());
+    private CardsConnection: CardsCRUD = new CardsCRUD(DataBaseIni.getConnection());
+    private PINCVVConnection: PINCVVCRUD = new PINCVVCRUD(DataBaseIni.getConnection());
+    private TransferConnection: TransferCRUD = new TransferCRUD(DataBaseIni.getConnection());
+    private UserConnection: UserCRUD = new UserCRUD(DataBaseIni.getConnection());
+    private ValidateAccountConnection: ValidateAccountCRUD = new ValidateAccountCRUD(DataBaseIni.getConnection());
+    private Email : EmailManager = new EmailManager();
 
-
-    public constructor(app: Application) {
+    public constructor(app: Application, authorizer: Authorizer) {
         this.App = app;
         this.Router = new Router();
+        this.AuthorizerUsers = authorizer;
     }
 
     private Init() {
@@ -40,45 +63,79 @@ class EndpointsManager {
     }
 
     private InitRoutesAuth() : void {
-        const connection = DataBaseIni.getConnection();
-        const crud = new AuthenticationCRUD(connection);
-        const manager = new AuthenticationManager(crud);
+        const manager = new AuthenticationManager(
+            this.AuthorizerUsers,
+            this.AuthenticationConnection,
+            this.Email,
+            this.UserConnection
+        );
         new Login(this.Router, manager);
-        new ForgotPassword(this.Router);
-        new ResetPassword(this.Router);
-        new VerifyOTP(this.Router);
+        new ForgotPassword(this.Router, manager);
+        new ResetPassword(this.Router, manager);
     }
 
     private InitRoutesUser() : void {
-        new CreateAccount(this.Router);
-        new DeleteUser(this.Router);
-        new GetUser(this.Router);
-        new UpdateUser(this.Router);
+        const manager = new UserManager(
+            this.UserConnection,
+            this.AuthorizerUsers
+        );
+        new DeleteUser(this.Router, manager);
+        new GetUser(this.Router, manager);
+        new UpdateUser(this.Router, manager);
+        new CreateUser(this.Router, manager);
     }
 
     private InitRoutesAccounts() : void {
-        new AccountMovements(this.Router);
-        new CreateAccount(this.Router);
-        new SeeAccount(this.Router);
-        new SeeAccounts(this.Router);
-        new SetStateAccount(this.Router);
+        const manager = new AccountManager(
+            this.AccountConnection,
+            this.AuthorizerUsers,
+            this.ValidateAccountConnection
+        );
+        new AccountMovements(this.Router, manager);
+        new CreateAccount(this.Router, manager);
+        new SeeAccount(this.Router, manager);
+        new SeeAccounts(this.Router, manager);
+        new SetStateAccount(this.Router, manager);
     }
 
     private InitRoutesCards() : void {
-        new CreateCard(this.Router);
-        new GetCard(this.Router);
-        new GetCardMovements(this.Router);
-        new GetCards(this.Router);
-        new InsertMovement(this.Router);
+        const manager = new CardsManager(
+            this.AuthorizerUsers,
+            this.CardsConnection
+        );
+        new CreateCard(this.Router, manager);
+        new GetCard(this.Router, manager);
+        new GetCardMovements(this.Router, manager);
+        new GetCards(this.Router, manager);
     }
     
     private InitRoutesTransfers() : void {
-        new InternalTransfers(this.Router);
+        const manager = new TransferManager(
+            this.TransferConnection,
+            this.AccountConnection,
+            this.AuthorizerUsers
+        );
+        new InternalTransfers(this.Router, manager);
     }
 
     private InitRoutesPINCVV() : void {
-        new GenerateOPTPinCvv(this.Router);
-        new VerifyOTP(this.Router);
+        const manager = new PINCVVManager(
+            this.AuthorizerUsers,
+            this.Email,
+            this.CardsConnection,
+            new UserManager(this.UserConnection, this.AuthorizerUsers),
+            this.PINCVVConnection
+        );
+        new GenerateOPTPinCvv(this.Router, manager);
+    }
+
+    private InitRoutesValidateAccount() : void {
+        const manager = new AccountManager(
+            this.AccountConnection,
+            this.AuthorizerUsers,
+            this.ValidateAccountConnection
+        );
+        new ValidateAccount(this.Router, manager);
     }
 
     private InitAllRoutes() : void {
@@ -90,10 +147,6 @@ class EndpointsManager {
         this.InitRoutesTransfers();
         this.InitRoutesPINCVV();
         this.InitRoutesValidateAccount();
-    }
-
-    private InitRoutesValidateAccount() : void {
-        new ValidateAccount(this.Router);
     }
 
     public Start() : void {
