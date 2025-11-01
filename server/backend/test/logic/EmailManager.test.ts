@@ -1,4 +1,4 @@
-import EmailManager from "../src/logic/EmailManager.ts";
+import EmailManager from "../../src/logic/EmailManager.ts";
 import { assertEquals } from "@std/assert";
 
 Deno.test("EmailManager - Envía un correo electrónico exitosamente", async () => {
