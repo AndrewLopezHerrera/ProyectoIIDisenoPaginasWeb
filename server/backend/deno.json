@@ -11,7 +11,8 @@
     "bcrypt": "https://deno.land/x/bcrypt/mod.ts",
     "djwt": "https://deno.land/x/djwt@v3.0.2/mod.ts",
     "oak": "npm:oak@^9.0.0",
-    "postgresql": "jsr:@db/postgres"
+    "postgresql": "jsr:@db/postgres",
+    "mocking": "jsr:@std/testing/mock"
   },
   "nodeModulesDir": "auto"
 }

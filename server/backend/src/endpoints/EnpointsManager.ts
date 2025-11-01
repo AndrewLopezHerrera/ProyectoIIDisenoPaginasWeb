@@ -2,7 +2,6 @@ import { Application, Router } from "oak";
 import ResetPassword from "./authentication/ResetPassword.ts";
 import Login from "./authentication/Login.ts";
 import ForgotPassword from "./authentication/ForgotPassword.ts";
-import VerifyOTP from "./authentication/VerifyOTP.ts";
 import CreateAccount from "./accounts/CreateAccount.ts";
 import DeleteUser from "./users/DeleteUser.ts";
 import GetUser from "./users/GetUser.ts";
@@ -16,14 +15,17 @@ import CreateCard from "./cards/CreateCard.ts";
 import GetCard from "./cards/GetCard.ts";
 import GetCardMovements from "./cards/GetCardMovements.ts";
 import GetCards from "./cards/GetCards.ts";
-import InsertMovement from "./cards/InsertMovement.ts";
 import GenerateOPTPinCvv from "./pin_cvv/GenerateOPTPinCvv.ts";
 import ValidateAccount from "./validate_accounts/ValidateAccount.ts";
+import DataBaseIni from "../databaseconnection/DataBaseIni.ts";
+import AuthenticationCRUD from "../databaseconnection/AuthenticationCRUD.ts";
+import AuthenticationManager from "../logic/AuthenticationManager.ts";
 
 class EndpointsManager {
     private App: Application;
     private Router: Router;
     private Port : number = 8080;
+
 
     public constructor(app: Application) {
         this.App = app;
@@ -38,7 +40,10 @@ class EndpointsManager {
     }
 
     private InitRoutesAuth() : void {
-        new Login(this.Router);
+        const connection = DataBaseIni.getConnection();
+        const crud = new AuthenticationCRUD(connection);
+        const manager = new AuthenticationManager(crud);
+        new Login(this.Router, manager);
         new ForgotPassword(this.Router);
         new ResetPassword(this.Router);
         new VerifyOTP(this.Router);
@@ -77,6 +82,7 @@ class EndpointsManager {
     }
 
     private InitAllRoutes() : void {
+        DataBaseIni.initConection();
         this.InitRoutesAuth();
         this.InitRoutesUser();
         this.InitRoutesAccounts();
