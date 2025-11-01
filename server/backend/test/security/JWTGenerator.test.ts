@@ -1,6 +1,6 @@
 import { assertEquals, assertExists } from "@std/assert";
-import JWTGenerator from "../src/security/JWTGenerator.ts";
-import ErrorWeb from "../src/web_error/WebError.ts";
+import JWTGenerator from "../../src/security/JWTGenerator.ts";
+import ErrorWeb from "../../src/web_error/WebError.ts";
 import type { Payload } from "djwt";
 
 Deno.test("JWTGenerator - Genera y verifica un token JWT válido", async () => {

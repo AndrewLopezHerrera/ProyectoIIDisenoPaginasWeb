@@ -26,6 +26,7 @@ class EmailManager {
             body: JSON.stringify(message)
         });
         if(!response.ok) {
+            console.error("Error response from Resend API:", await response.text());
             throw new WebError("Error al enviar el OTP al correo electrónico", 500);
         }
         const data = await response.json().catch(() => null);

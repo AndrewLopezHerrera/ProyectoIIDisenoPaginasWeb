@@ -1,9 +1,8 @@
-import { assertEquals, assertExists, assertNotEquals, assertRejects } from "@std/assert";
-import Authorizer from "../src/security/Authorizer.ts";
-import JWTGenerator from "../src/security/JWTGenerator.ts";
-import { User } from "../src/interfaces/User.ts";
+import { assertEquals, assertExists, assertNotEquals } from "@std/assert";
+import Authorizer from "../../src/security/Authorizer.ts";
+import JWTGenerator from "../../src/security/JWTGenerator.ts";
+import { User } from "../../src/interfaces/User.ts";
 import { genSalt, hash } from "bcrypt";
-import WebError from "../src/web_error/WebError.ts";
 
 Deno.test("Authorizer - Login exitoso genera un token JWT", async () => {
   const secret = await crypto.subtle.generateKey(
@@ -30,7 +29,7 @@ Deno.test("Authorizer - Login exitoso genera un token JWT", async () => {
     phone: "",
     idtypeident: 0
   };
-  const token = await authorizer.Login(user, password);
+  const token = await authorizer.Login(user);
   assertExists(token);
   assertEquals(typeof token, "string");
 });
@@ -60,39 +59,9 @@ Deno.test("Authorizer - Login con contraseña incorrecta lanza WebError", async 
     phone: "1234567890",
     idtypeident: 0
   };
-  const token = await authorizer.Login(user, password);
+  const token = await authorizer.Login(user);
   assertExists(token);
   assertEquals(typeof token, "string");
-});
-
-Deno.test("Authorizer - Login con contraseña incorrecta lanza WebError", async () => {
-  const secret = await crypto.subtle.generateKey(
-    { name: "HMAC", hash: "SHA-512" },
-    true,
-    ["sign", "verify"],
-  );
-  const jwtGen = new JWTGenerator(secret);
-  const authorizer = new Authorizer(jwtGen);
-
-  const password = "securePassword";
-  const salt = await genSalt(10);
-  const hashedPassword = await hash(password, salt);
-  const user: User = {
-    identification: "user123",
-    email: "user123@example.com",
-    password: hashedPassword,
-    idusertype: 2,
-    username: "user123",
-    name: "User",
-    lastnameone: "One",
-    lastnametwo: "Two",
-    borndate: new Date(),
-    phone: "1234567890",
-    idtypeident: 0
-  };
-  await assertRejects(async () => {
-    await authorizer.Login(user, "wrongPassword");
-  }, WebError);
 });
 
 Deno.test("Authorizer - HashPassword genera un hash diferente para la misma contraseña", async () => {
