@@ -7,7 +7,6 @@ import Authorizer from "../../src/security/Authorizer.ts";
 import { User } from "../../src/interfaces/User.ts";
 import WebError from "../../src/web_error/WebError.ts";
 
-// Mocks simples
 const sampleUser: User = {
   identification: "user123",
   username: "john",

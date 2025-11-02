@@ -5,7 +5,6 @@ import Authorizer from "../../src/security/Authorizer.ts";
 import { User } from "../../src/interfaces/User.ts";
 import WebError from "../../src/web_error/WebError.ts";
 
-// Mock de UserCRUD
 const createMockUserCRUD = (): UserCRUD => {
     return {
         CreateUser: async (_data: User) => {},
@@ -29,7 +28,6 @@ const createMockUserCRUD = (): UserCRUD => {
     } as unknown as UserCRUD;
 };
 
-// Mock de Authorizer
 const createMockAuthorizer = (isAdmin = false, isOwner = true): Authorizer => {
     return {
         IsAdministrador: (_jwt: string) => Promise.resolve(isAdmin),
@@ -56,14 +54,13 @@ Deno.test("UserManager - CreateUser crea un usuario correctamente", async () => 
         idtypeident: 1
     };
     
-    // Verificar que no lanza error
     await manager.CreateUser(userData);
     assertEquals(true, true);
 });
 
 Deno.test("UserManager - GetUser devuelve usuario cuando es admin Y propietario", async () => {
     const mockCRUD = createMockUserCRUD();
-    const mockAuth = createMockAuthorizer(true, true); // Admin Y propietario (lógica actual usa &&)
+    const mockAuth = createMockAuthorizer(true, true);
     const manager = new UserManager(mockCRUD, mockAuth);
     
     const user = await manager.GetUser("testuser", "admin-jwt-token");
@@ -76,11 +73,9 @@ Deno.test("UserManager - GetUser devuelve usuario cuando es admin Y propietario"
 
 Deno.test("UserManager - GetUser rechaza solo propietario (bug lógico)", async () => {
     const mockCRUD = createMockUserCRUD();
-    const mockAuth = createMockAuthorizer(false, true); // No admin pero sí propietario
+    const mockAuth = createMockAuthorizer(false, true);
     const manager = new UserManager(mockCRUD, mockAuth);
     
-    // NOTA: El código usa ||, lo que requiere AMBOS (admin Y owner) para autorizar
-    // Esto parece un bug lógico, debería usar && para permitir cualquiera de los dos
     await assertRejects(
         async () => {
             await manager.GetUser("testuser", "owner-jwt-token");
@@ -92,7 +87,7 @@ Deno.test("UserManager - GetUser rechaza solo propietario (bug lógico)", async 
 
 Deno.test("UserManager - GetUser lanza error cuando no está autorizado", async () => {
     const mockCRUD = createMockUserCRUD();
-    const mockAuth = createMockAuthorizer(false, false); // Ni admin ni propietario
+    const mockAuth = createMockAuthorizer(false, false);
     const manager = new UserManager(mockCRUD, mockAuth);
     
     await assertRejects(
@@ -106,7 +101,7 @@ Deno.test("UserManager - GetUser lanza error cuando no está autorizado", async 
 
 Deno.test("UserManager - UpdateUser actualiza cuando es admin Y propietario", async () => {
     const mockCRUD = createMockUserCRUD();
-    const mockAuth = createMockAuthorizer(true, true); // Debe ser ambos (bug lógico)
+    const mockAuth = createMockAuthorizer(true, true);
     const manager = new UserManager(mockCRUD, mockAuth);
     
     const updatedData: User = {
@@ -122,8 +117,7 @@ Deno.test("UserManager - UpdateUser actualiza cuando es admin Y propietario", as
         idusertype: 1,
         idtypeident: 1
     };
-    
-    // Verificar que no lanza error
+
     await manager.UpdateUser(updatedData, "admin-jwt-token");
     assertEquals(true, true);
 });
@@ -158,20 +152,18 @@ Deno.test("UserManager - UpdateUser lanza error cuando no está autorizado", asy
 
 Deno.test("UserManager - DeleteUser elimina cuando es admin Y propietario", async () => {
     const mockCRUD = createMockUserCRUD();
-    const mockAuth = createMockAuthorizer(true, true); // Debe ser ambos (bug lógico)
+    const mockAuth = createMockAuthorizer(true, true);
     const manager = new UserManager(mockCRUD, mockAuth);
     
-    // Verificar que no lanza error
     await manager.DeleteUser("testuser", "admin-jwt-token");
     assertEquals(true, true);
 });
 
 Deno.test("UserManager - DeleteUser rechaza solo propietario (bug lógico)", async () => {
     const mockCRUD = createMockUserCRUD();
-    const mockAuth = createMockAuthorizer(false, true); // Solo propietario, no admin
+    const mockAuth = createMockAuthorizer(false, true);
     const manager = new UserManager(mockCRUD, mockAuth);
     
-    // NOTA: La lógica actual con || requiere AMBOS para autorizar
     await assertRejects(
         async () => {
             await manager.DeleteUser("testuser", "owner-jwt-token");

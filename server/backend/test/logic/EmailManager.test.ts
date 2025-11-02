@@ -10,11 +10,10 @@ Deno.test("EmailManager - Envía un correo electrónico exitosamente", async () 
 
     try {
         emailManager.SendEmail(to, subject, body);
-        //Otro correo simultaneo para verificar que no haya problemas de concurrencia
         emailManager.SendEmail(to, subject + "Diferente", body + " - Diferente");
-        assertEquals(true, true); // Si no hay error, la prueba es exitosa
+        assertEquals(true, true);
     } catch (error) {
         console.error("Error al enviar el correo electrónico:", error);
-        assertEquals(true, false); // La prueba falla si hay un error
+        assertEquals(true, false);
     }
 });
