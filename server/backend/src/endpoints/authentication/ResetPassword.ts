@@ -16,10 +16,8 @@ class ResetPassword {
         this.Manager = manager;
         router.post("/api/v1/auth/reset-password", async (context: Context) => {
             try {
-                const body = await context.request.body();
-                if (body.type !== "json")
-                    throw new WebError("Invalid request", 400, "Cuerpo de solicitud no es JSON");
-                const { email, newPassword, otp } = body.value;
+                const body = context.request.body;
+                const { email, newPassword, otp } = await body.json();
                 if (!email || !newPassword || !otp)
                     throw new WebError("Missing fields", 400, "Faltan campos obligatorios");
                 await this.Manager.ResetPassword(email, newPassword, otp);

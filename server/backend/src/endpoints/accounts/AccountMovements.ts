@@ -10,7 +10,7 @@ class AccountMovements {
         router.get("/api/v1/accounts/:accountId/movements", async (context: Context) => {
             try {
                 const authHeader = context.request.headers.get("Authorization");
-                const accountId = context.params.accountId;
+                const accountId = context.request.url.searchParams.get("accountId");
                 if (!accountId)
                     throw new WebError("Missing account ID", 400, "Falta el ID de la cuenta");
                 if (!authHeader || !authHeader.startsWith("Bearer ")) {

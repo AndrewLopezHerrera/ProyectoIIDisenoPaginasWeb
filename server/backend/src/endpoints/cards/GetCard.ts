@@ -14,7 +14,7 @@ class GetCard{
                     throw new WebError("Unauthorized", 401, "Falta el token de autorización");
                 }
                 const token = authHeader.split(" ")[1];
-                const cardId = ctx.params.cardId;
+                const cardId = ctx.request.url.searchParams.get("cardId");
                 if (!cardId)
                     throw new WebError("Missing parameters", 400, "Falta el ID de la tarjeta en la solicitud");
                 const card = await this.Manager.GetCard(token, cardId);

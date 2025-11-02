@@ -10,10 +10,8 @@ class CreateAccount {
         this.Manager = manager;
         router.post("/api/v1/accounts", async (context: Context) => {
             try {
-                const body = await context.request.body();
-                if (body.type !== "json")
-                    throw new WebError("Invalid request", 400, "Cuerpo de solicitud no es JSON");
-                const datos: Account = body.value;
+                const body = await context.request.body;
+                const datos: Account = await body.json();
                 if (!datos.iduser || !datos.funds || !datos.idtypeaccount || !datos.idtypemoney)
                     throw new WebError("Missing fields", 400, "Faltan campos obligatorios");
                  await this.Manager.CreateAccount(datos);

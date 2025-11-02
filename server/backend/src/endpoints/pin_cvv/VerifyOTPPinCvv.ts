@@ -14,8 +14,8 @@ class VerifyOTPPinCvv {
                     throw new WebError("Unauthorized", 401, "Falta el token de autorización");
                 }
                 const token = authHeader.split(" ")[1];
-                const body = ctx.request.body({ type: "json" });
-                const { otp, cardID } = await body.value;
+                const body = ctx.request.body;
+                const { otp, cardID } = await body.json();
                 if (!cardID)
                     throw new WebError("Missing parameters", 400, "Falta el ID de la tarjeta en la solicitud");
                 const card = await this.Manager.ValidateOTP(cardID, otp, token);

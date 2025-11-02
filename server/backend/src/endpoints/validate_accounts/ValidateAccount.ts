@@ -14,8 +14,8 @@ class ValidateAccount {
                     throw new WebError("Unauthorized", 401, "Falta el token de autorización");
                 }
                 const token = authHeader.split(" ")[1];
-                const body = await ctx.request.body().value;
-                const { accountNumber, bankCode } = body;
+                const body = await ctx.request.body;
+                const { accountNumber, bankCode } = await body.json();
                 if (!accountNumber || !bankCode)
                     throw new WebError("Missing parameters", 400, "Faltan parámetros obligatorios en la solicitud");
                 const isValid = await this.Manager.ValidateAccountExists(accountNumber, token);

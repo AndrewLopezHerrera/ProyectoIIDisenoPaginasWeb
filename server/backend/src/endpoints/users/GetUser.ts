@@ -9,14 +9,12 @@ class GetUser {
         this.Manager = manager;
         router.get("/api/v1/users/:identification", async (context: Context) => {
             try {
-                const identification = context.params.identification;
+                const identification = context.request.url.searchParams.get("identification");
                 const authHeader = context.request.headers.get("Authorization");
                 if (!authHeader || !authHeader.startsWith("Bearer ")) {
                     throw new WebError("Unauthorized", 401, "Falta el token de autorización");
                 }
                 const token = authHeader.split(" ")[1];
-                if (context.request.body.type !== "json")
-                    throw new WebError("Invalid request", 400, "Cuerpo de solicitud no es JSON");
                 if (!identification)
                     throw new WebError("Missing user ID", 400, "Falta el ID de usuario");
                 const user = await this.Manager.GetUser(identification, token);

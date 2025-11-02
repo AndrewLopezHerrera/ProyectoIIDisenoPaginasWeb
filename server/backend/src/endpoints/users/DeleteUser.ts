@@ -9,7 +9,7 @@ class DeleteUser {
         this.Manager = manager;
         router.delete("/api/v1/users/:id", async (context: Context) => {
             try {
-                const id = context.params.id;
+                const id = context.request.url.searchParams.get("id");
                 const authHeader = context.request.headers.get("Authorization");
                 if (!authHeader || !authHeader.startsWith("Bearer ")) {
                     throw new WebError("Unauthorized", 401, "Falta el token de autorización");

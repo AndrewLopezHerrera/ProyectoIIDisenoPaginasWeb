@@ -10,10 +10,8 @@ class CreateUser {
         this.Manager = manager;
         router.post("/api/v1/users", async (context: Context) => {
             try {
-                const body = await context.request.body();
-                if (body.type !== "json")
-                    throw new WebError("Invalid request", 400, "Cuerpo de solicitud no es JSON");
-                const user: User = body.value;
+                const body = await context.request.body;
+                const user: User = await body.json();
                 if (!user.username || !user.email || !user.password)
                     throw new WebError("Missing fields", 400, "Faltan campos obligatorios");
                 await this.Manager.CreateUser(user);

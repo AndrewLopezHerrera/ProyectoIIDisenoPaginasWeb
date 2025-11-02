@@ -10,10 +10,8 @@ class UpdateUser {
         this.Manager = manager;
         router.put("/api/v1/users/:id", async (context: Context) => {
             try {
-                const body = await context.request.body();
-                if (body.type !== "json")
-                    throw new WebError("Invalid request", 400, "Cuerpo de solicitud no es JSON");
-                const userData: User = body.value;
+                const body = await context.request.body;
+                const userData: User = await body.json();
                 const authHeader = context.request.headers.get("Authorization");
                 if (!userData.identification)
                     throw new WebError("Missing user ID", 400, "Falta el ID de usuario");

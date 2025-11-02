@@ -10,7 +10,7 @@ class SeeAccounts {
         router.get("/api/v1/accounts/:id", async (context: Context) => {
             try {
                 const authHeader = context.request.headers.get("Authorization");
-                const id = context.params.id;
+                const id = context.request.url.searchParams.get("id");
                 if (!id)
                     throw new WebError("Missing account ID", 400, "Falta el ID de la cuenta");
                 if (!authHeader || !authHeader.startsWith("Bearer ")) {

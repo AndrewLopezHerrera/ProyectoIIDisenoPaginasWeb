@@ -14,11 +14,15 @@ class GetCardMovements {
                     throw new WebError("Unauthorized", 401, "Falta el token de autorización");
                 }
                 const token = authHeader.split(" ")[1];
-                const cardId = ctx.params.cardId;
+                const cardId = ctx.request.url.searchParams.get("cardId");
+                const startDateParam = ctx.request.url.searchParams.get("startDate") || "";
+                const startDate = new Date(startDateParam);
+                const endDateParam = ctx.request.url.searchParams.get("endDate") || "";
+                const endDate = new Date(endDateParam);
                 if (!cardId)
                     throw new WebError("Missing parameters", 400, "Falta el ID de la tarjeta en la solicitud");
-                
-                ctx.response.body = { message: `Movements for card ${cardId} retrieved successfully` };
+                const movements = await this.Manager.GetCardMovements(cardId, startDate, endDate, token);
+                ctx.response.body = { movements };
 
             } catch (error: WebError | unknown) {
                 if (error instanceof WebError) {
