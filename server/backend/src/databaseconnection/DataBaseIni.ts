@@ -5,7 +5,7 @@ import { Client } from "postgresql";
  * Esta clase conecta el API con la base de datos PostgreSQL.
  */
 class DataBaseIni {
-    private static readonly HOST: string = 'localhost';
+    private static readonly HOST: string = '134.199.141.222';
     private static readonly PORT: number = 15435;
     private static readonly USER: string = 'user_orbita';
     private static readonly PASSWORD: string = 'pR6#hV71zX';
@@ -14,7 +14,7 @@ class DataBaseIni {
 
     public static async initConection() {
         const data = {
-            host: this.HOST,
+            hostname: this.HOST,
             port: this.PORT,
             user: this.USER,
             password: this.PASSWORD,

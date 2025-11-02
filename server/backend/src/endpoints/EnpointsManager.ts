@@ -139,7 +139,6 @@ class EndpointsManager {
     }
 
     private InitAllRoutes() : void {
-        DataBaseIni.initConection();
         this.InitRoutesAuth();
         this.InitRoutesUser();
         this.InitRoutesAccounts();
