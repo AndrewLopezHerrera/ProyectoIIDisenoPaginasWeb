@@ -1,12 +1,29 @@
 import WebError from "../web_error/WebError.ts";
+import { SMTPClient } from "smtp";
 
 class EmailManager {
+    private Client: SMTPClient | null = null;
 
     /**
      * El método constructor de la clase EmailManager.
      */
-    public constructor() {
-        
+    public constructor() {}
+
+    public async Connect() {
+        // denomailer establece la conexión durante send(); aquí solo configuramos el cliente
+        this.Client = new SMTPClient({
+            connection: {
+                hostname: "smtp.zoho.com",
+                port: 465,
+                tls: true,
+                auth: {
+                    username: "bancoorbita@zohomail.com",
+                    password: "gyoHAMST4858.",
+                },
+            },
+        });
+        // No hay conexión previa; send() gestiona el handshake. Mantenemos async para compatibilidad con tests.
+        await Promise.resolve();
     }
 
     /**
@@ -15,23 +32,23 @@ class EmailManager {
      * @param subject El asunto del correo electrónico.
      * @param body El contenido del correo electrónico.
      */
-    public async SendEmail(to: string, subject: string, body: string) : Promise<void> {
+    public SendEmail(to: string, subject: string, body: string) : void {
         const message = this.createMessage(to, subject, body);
-        const response = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-                "Authorization": "Bearer re_dZP7PmCP_LE4rzwbCFZ9mntAHtHYCxopk",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(message)
-        });
-        if(!response.ok) {
-            console.error("Error response from Resend API:", await response.text());
-            throw new WebError("Error al enviar el OTP al correo electrónico", 500);
+        if (!this.Client) {
+            throw new WebError("El cliente SMTP no está conectado.", 500);
         }
-        const data = await response.json().catch(() => null);
-        if(!data || !data.id) {
-            throw new WebError("Error al enviar el OTP al correo electrónico", 500);
+        try {
+            this.Client.send(message);
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                console.error("Error al enviar el correo electrónico:", error.message);
+                throw new WebError(`Error al enviar el correo electrónico: ${error.message}`, 500);
+            }
+            else {
+                console.error("Error desconocido al enviar el correo electrónico.");
+                throw new WebError("Error desconocido al enviar el correo electrónico.", 500);
+            }
         }
     }
 
@@ -44,27 +61,18 @@ class EmailManager {
      */
     private createMessage(to: string, subject: string, body: string) {
         const message = {
-            from: "Acme <onboarding@srlgestock.space>",
-            to: [to],
+            from: "bancoorbita@zohomail.com",
+            to: to,
             subject: subject,
-            html: "<p>" + body + "</p>",
+            html: `<html>
+                    <body>
+                        <h1>Banco Órbita</h1>
+                        <p>${body}</p>
+                    </body>
+                </html>`,
         };
         return message;
     }
 }
 
 export default EmailManager;
-
-/**
- * Ejemplo
- * 
- * curl -X POST 'https://api.resend.com/emails' \
- -H 'Authorization: Bearer re_xxxxxxxxx' \
- -H 'Content-Type: application/json' \
- -d $'{
-  "from": "Acme <onboarding@resend.dev>",
-  "to": ["delivered@resend.dev"],
-  "subject": "hello world",
-  "html": "<p>it works!</p>"
-}'
- */

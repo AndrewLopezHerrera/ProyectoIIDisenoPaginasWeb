@@ -3,12 +3,15 @@ import { assertEquals } from "@std/assert";
 
 Deno.test("EmailManager - Envía un correo electrónico exitosamente", async () => {
     const emailManager = new EmailManager();
+    await emailManager.Connect();
     const to = "andrewdenilsonlopez@gmail.com";
     const subject = "Prueba de correo electrónico";
     const body = "Este es un correo electrónico de prueba enviado desde EmailManager.";
 
     try {
-        await emailManager.SendEmail(to, subject, body);
+        emailManager.SendEmail(to, subject, body);
+        //Otro correo simultaneo para verificar que no haya problemas de concurrencia
+        emailManager.SendEmail(to, subject + "Diferente", body + " - Diferente");
         assertEquals(true, true); // Si no hay error, la prueba es exitosa
     } catch (error) {
         console.error("Error al enviar el correo electrónico:", error);

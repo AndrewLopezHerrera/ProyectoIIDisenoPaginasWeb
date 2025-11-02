@@ -6,13 +6,12 @@
   "imports": {
     "@db/postgres": "jsr:@db/postgres@^0.19.5",
     "@std/assert": "jsr:@std/assert@1",
-    "@upyo/core": "jsr:@upyo/core@^0.3.0",
-    "@upyo/resend": "jsr:@upyo/resend@^0.3.0",
     "bcrypt": "https://deno.land/x/bcrypt/mod.ts",
     "djwt": "https://deno.land/x/djwt@v3.0.2/mod.ts",
     "oak": "npm:oak@^9.0.0",
     "postgresql": "jsr:@db/postgres",
-    "mocking": "jsr:@std/testing/mock"
+    "mocking": "jsr:@std/testing/mock",
+    "smtp": "https://deno.land/x/denomailer@1.6.0/mod.ts"
   },
   "nodeModulesDir": "auto"
 }
