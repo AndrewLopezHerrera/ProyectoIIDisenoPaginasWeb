@@ -21,7 +21,7 @@ class ForgotPassword {
                 if (!email)
                     throw new WebError("Missing fields", 400, "Faltan campos obligatorios");
                 await this.Manager.RecoverPassword(email);
-                context.response.body = { message: "Se ha enviado un enlace de restablecimiento de contraseña a su correo" };
+                context.response.body = { message: "Se ha enviado un OTP de restablecimiento de contraseña a su correo" };
 
             } catch (error: WebError | unknown) {
                 if (error instanceof WebError) {

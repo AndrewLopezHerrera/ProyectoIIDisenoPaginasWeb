@@ -17,6 +17,9 @@ class CreateCard {
                 const token = authHeader.split(" ")[1];
                 const body = ctx.request.body;
                 const card : Card = await body.json();
+                if(!card.iduser || !card.iban){
+                    throw new WebError("Bad Request", 400, "Faltan datos obligatorios para crear la tarjeta");
+                }
                 await this.Manager.CreateCard(card, token);
                 ctx.response.body = { message: "Se ha creado la tarjeta correctamente" };
 

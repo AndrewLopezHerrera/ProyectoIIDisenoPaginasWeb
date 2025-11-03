@@ -10,10 +10,11 @@ class UpdateUser {
         this.Manager = manager;
         router.put("/api/v1/users/:id", async (context: Context) => {
             try {
-                const body = await context.request.body;
+                const body = context.request.body;
+                const identification = context.request.url.searchParams.get("id");
                 const userData: User = await body.json();
                 const authHeader = context.request.headers.get("Authorization");
-                if (!userData.identification)
+                if (!identification || !userData.username)
                     throw new WebError("Missing user ID", 400, "Falta el ID de usuario");
                 if (!authHeader || !authHeader.startsWith("Bearer ")) {
                     throw new WebError("Unauthorized", 401, "Falta el token de autorización");

@@ -15,13 +15,9 @@ class GetCardMovements {
                 }
                 const token = authHeader.split(" ")[1];
                 const cardId = ctx.request.url.searchParams.get("cardId");
-                const startDateParam = ctx.request.url.searchParams.get("startDate") || "";
-                const startDate = new Date(startDateParam);
-                const endDateParam = ctx.request.url.searchParams.get("endDate") || "";
-                const endDate = new Date(endDateParam);
                 if (!cardId)
                     throw new WebError("Missing parameters", 400, "Falta el ID de la tarjeta en la solicitud");
-                const movements = await this.Manager.GetCardMovements(cardId, startDate, endDate, token);
+                const movements = await this.Manager.GetCardMovements(cardId, null, null, token);
                 ctx.response.body = { movements };
 
             } catch (error: WebError | unknown) {

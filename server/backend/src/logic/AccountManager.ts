@@ -30,7 +30,43 @@ class AccountManager {
      * @param data Datos de la cuenta a crear.
      */
     public async CreateAccount(data: Account){
+        let seguir = true;
+        let iban = "";
+        while(seguir){
+            iban = this.GenerateRandomIBAN();
+            if(!(await this.ValidatorAccounts.ValidateAccountExistence(iban))){
+                seguir = false;
+            }
+        }
+        data.funds = 500000;
+        data.iban = iban;
         await this.Connection.CreateAccount(data);
+    }
+
+    /**
+     * Genera un IBAN aleatorio.
+     * @param countryCode Código del país (por defecto "CR").
+     * @returns IBAN generado.
+     */
+    private GenerateRandomIBAN(countryCode = "CR"): string {
+        countryCode = countryCode.toUpperCase();
+        const bankCode = this.RandomDigits(4);
+        const branchCode = this.RandomDigits(4);
+        const accountNumber = this.RandomDigits(10);
+        return `${countryCode}${bankCode}${branchCode}${accountNumber}`;
+    }
+
+    /**
+     * Genera una cadena de dígitos aleatorios de una longitud dada.
+     * @param length Longitud de la cadena a generar.
+     * @returns Cadena de dígitos aleatorios.
+     */
+    private RandomDigits(length: number): string {
+        let result = "";
+        for (let i = 0; i < length; i++) {
+            result += Math.floor(Math.random() * 10).toString();
+        }
+        return result;
     }
 
     /**

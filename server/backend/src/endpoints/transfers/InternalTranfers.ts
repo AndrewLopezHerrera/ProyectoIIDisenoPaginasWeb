@@ -15,7 +15,7 @@ class InternalTransfers {
                     throw new WebError("Unauthorized", 401, "Falta el token de autorización");
                 }
                 const token = authHeader.split(" ")[1];
-                const body = await context.request.body;
+                const body = context.request.body;
                 const transfer: Transfer = await body.json();
                 if (!transfer.from || !transfer.to || !transfer.amount)
                     throw new WebError("Missing parameters", 400, "Faltan parámetros en la solicitud");

@@ -1,5 +1,6 @@
 import { Client } from "postgresql";
 import { User } from "../interfaces/User.ts";
+import WebError from "../web_error/WebError.ts";
 
 class AuthenticationCRUD {
     private Connection: Client;
@@ -10,7 +11,12 @@ class AuthenticationCRUD {
 
     public async Login(username: string, password: string): Promise<User> {
         const result = await this.Connection.queryObject<User>("CALL orbita.sp_auth_login($1, $2)", [username, password]);
-        return result.rows[0];
+        if (result.warnings.toString() == "Usuario o contraseña inválidos") {
+            throw new WebError("Credenciales inválidas", 401);
+        }
+        const identificación = result.warnings[0].message;
+        const resultUser = await this.Connection.queryObject<User>("SELECT * FROM orbita.sp_auth_user_get_by_identification($1)", [identificación]);
+        return resultUser.rows[0];
     }
 
     public async ForgotPassword(identification: string, code: string, minutesValid: number): Promise<void> {
@@ -23,7 +29,7 @@ class AuthenticationCRUD {
             [identification, code]
         );
         //Obtener el mensaje de RAISE NOTICE
-        if (result.warnings.toString() == "OTP consumido correctamente para el usuario %".replace("%", identification)) {
+        if (result.warnings[0].message == "OTP consumido correctamente para el usuario %".replace("%", identification)) {
             return true;
         }
         return false;

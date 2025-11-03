@@ -11,7 +11,7 @@ class AccountCRUD {
     }
 
     public async CreateAccount(data: Account): Promise<void> {
-        await this.Connection.queryObject("CALL public.sp_crear_cuenta($1, $2, $3, $4, $5)",
+        const result = await this.Connection.queryObject("CALL orbita.sp_accounts_create($1, $2, $3, $4, $5)",
             [
                 data.iban,
                 data.funds,
@@ -20,10 +20,11 @@ class AccountCRUD {
                 data.idtypeaccount
             ]
         );
+        console.log(result.warnings[0].message);
     }
 
     public async GetAccountMovements(iban: string): Promise<Movement[]> {
-        const result = await this.Connection.queryObject<Movement>("SELECT orbita.sp_account_movements_list($1)", [iban]);
+        const result = await this.Connection.queryObject<Movement>("SELECT * FROM orbita.sp_account_movements_list($1)", [iban]);
         return result.rows as Movement[];
     }
 
@@ -32,7 +33,7 @@ class AccountCRUD {
     }
 
     public async SeeAccount(iban: string): Promise<Account> {
-        const result = await this.Connection.queryObject<Account>("SELECT orbita.sp_accounts_get($1)", [iban]);
+        const result = await this.Connection.queryObject<Account>("SELECT * FROM orbita.sp_accounts_get($1)", [iban]);
         const accounts = result.rows;
         const account = accounts.find(acc => acc.iban === iban);
         if (!account) {
@@ -42,7 +43,7 @@ class AccountCRUD {
     }
 
     public async SeeAccounts(idUsuario: string): Promise<Account[]> {
-        const result = await this.Connection.queryObject<Account>("SELECT orbita.sp_accounts_list($1)", [idUsuario]);
+        const result = await this.Connection.queryObject<Account>("SELECT * FROM orbita.sp_accounts_get_list($1)", [idUsuario]);
         return result.rows;
     }
 }

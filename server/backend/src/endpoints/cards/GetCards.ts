@@ -13,11 +13,8 @@ class GetCards {
                 if (!authHeader || !authHeader.startsWith("Bearer ")) {
                     throw new WebError("Unauthorized", 401, "Falta el token de autorización");
                 }
-                const identification = ctx.request.url.searchParams.get("identification");
-                if (!identification)
-                    throw new WebError("Buscando parámetros", 400, "Falta el parámetro de identificación en la solicitud");
                 const token = authHeader.split(" ")[1];
-                const cards = await this.Manager.GetCards(identification, token);
+                const cards = await this.Manager.GetCards(token);
                 ctx.response.body = { cards };
 
             } catch (error: WebError | unknown) {

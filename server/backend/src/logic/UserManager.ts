@@ -65,6 +65,7 @@ class UserManager {
         if(!await this.AuthorizerUsers.IsAdministrador(jwt) || !await this.AuthorizerUsers.IsOwner(jwt, user.identification)){
             throw new WebError("No autorizado a realizar esta acción", 403);
         }
+        user.password = "";
         return user;
     }
 }

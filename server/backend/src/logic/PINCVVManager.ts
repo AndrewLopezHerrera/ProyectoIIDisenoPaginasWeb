@@ -45,8 +45,8 @@ class PINCVVManager {
         }
         const otp = this.GenerateRandomOTP();
         await this.PINCVVConnection.GenerateOTPPINCVV(card.iduser, parseInt(otp), 10);
-        const user = await this.UserManager.GetUser(idUser, jwt);
-        await this.EmailManagerUsers.SendEmail(user.email, otp, "El OTP para ver su PIN/CVV es: " + otp);
+        const email = await this.AuthorizerUser.GetEmailFromToken(jwt);
+        this.EmailManagerUsers.SendEmail(email, otp, "El OTP para ver su PIN/CVV es: " + otp);
     }
 
     /**

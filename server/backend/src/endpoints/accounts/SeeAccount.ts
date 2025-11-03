@@ -7,7 +7,7 @@ class SeeAccount {
 
     public constructor(router: Router, manager: AccountManager) {
         this.Manager = manager;
-        router.get("/api/v1/accounts/:accountId", async (context: Context) => {
+        router.get("/api/v1/account/:accountId", async (context: Context) => {
             try {
                 const authHeader = context.request.headers.get("Authorization");
                 const accountId = context.request.url.searchParams.get("accountId");

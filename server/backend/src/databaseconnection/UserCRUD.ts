@@ -1,5 +1,6 @@
 import { Client } from "postgresql";
 import { User } from "../interfaces/User.ts";
+import WebError from "../web_error/WebError.ts";
 
 /**
  * Clase para gestionar operaciones CRUD de usuarios en la base de datos.
@@ -25,7 +26,12 @@ class UserCRUD {
             "CALL orbita.sp_auth_user_get_by_username_or_email($1);",
             [username]
         );
-        return result.rows[0];
+        if(result.warnings[0].message === "No se encontró ningún usuario con ese nombre o correo."){
+            throw new WebError("Usuario no encontrado", 404, result.warnings[0].message);
+        }
+        const identification = result.warnings[0].message;
+        const resultUser = await this.Connection.queryObject<User>("SELECT * FROM orbita.sp_auth_user_get_by_identification($1)", [identification]);
+        return resultUser.rows[0];
     }
 
     /**
@@ -44,7 +50,7 @@ class UserCRUD {
                 data.email,
                 data.phone,
                 data.password,
-                data.idusertype,
+                data.iduser,
                 data.idtypeident
             ]
         );

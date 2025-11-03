@@ -63,6 +63,7 @@ class EndpointsManager {
     }
 
     private InitRoutesAuth() : void {
+        this.Email.Connect();
         const manager = new AuthenticationManager(
             this.AuthorizerUsers,
             this.AuthenticationConnection,

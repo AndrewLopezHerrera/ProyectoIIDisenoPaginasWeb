@@ -33,6 +33,7 @@ class CardsManager {
         data.numbercard = this.GenerateNumberCard();
         data.pin = this.CreatePIN();
         data.cvv = this.CreateCVV();
+        data.expdate = new Date(Date.now() + 365 * 3 * 24 * 60 * 60 * 1000);
         await this.CardsConnection.CreateCard(data);
     }
 
@@ -94,12 +95,13 @@ class CardsManager {
      * @param jwtToken Token JWT del usuario que realiza la operación.
      * @returns Las tarjetas del usuario.
      */
-    public async GetCards(identification: string, jwtToken: string){
+    public async GetCards(jwtToken: string){
+        const identification = await this.AuthorizerUsers.GetUserIdFromToken(jwtToken);
         if(!await this.AuthorizerUsers.IsAdministrador(jwtToken) && !await this.AuthorizerUsers.IsOwner(jwtToken, identification)) {
             throw new WebError("No tienes permisos para ver estas tarjetas.", 403);
         }
         const cards = await this.CardsConnection.GetCards(identification);
-        cards.rows.forEach((card: Card) => {
+        cards.forEach((card: Card) => {
             card.pin = "";
             card.cvv = "";
         });
@@ -114,7 +116,7 @@ class CardsManager {
      * @param jwtToken Token JWT del usuario que realiza la operación.
      * @returns Los movimientos de la tarjeta.
      */
-    public async GetCardMovements(numberCard: string, startDate: Date, endDate: Date, jwtToken: string) : Promise<Movement[]>{
+    public async GetCardMovements(numberCard: string, startDate: Date | null, endDate: Date | null, jwtToken: string) : Promise<Movement[]>{
         const card = await this.CardsConnection.GetCard(numberCard);
         if(!await this.AuthorizerUsers.IsAdministrador(jwtToken) && !await this.AuthorizerUsers.IsOwner(jwtToken, card.iduser)) {
             throw new WebError("No tienes permisos para ver los movimientos de esta tarjeta.", 403);

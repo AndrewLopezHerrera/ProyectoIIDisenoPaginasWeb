@@ -31,9 +31,9 @@ class AuthenticationManager {
      * @param identification La identificación del usuario.
      * @param password La contraseña del usuario.
      */
-    public Login = async (identification: string, password: string) : Promise<string>=> {
-        const user = await this.Authentication.Login(identification, password);
-        if(user.identification !== identification){
+    public Login = async (username: string, password: string) : Promise<string>=> {
+        const user = await this.Authentication.Login(username, password);
+        if(user.username !== username || user.password !== password){
             throw new WebError("Credenciales inválidas", 401);
         }
         const token = await this.AuthorizerUser.Login(user);

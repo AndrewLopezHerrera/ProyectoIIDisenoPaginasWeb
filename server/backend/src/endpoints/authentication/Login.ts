@@ -17,10 +17,10 @@ class Login {
         router.post("/api/v1/auth/login", async (context: Context) => {
             try {
                 const body = context.request.body;
-                const { email, password } = await body.json();
-                if (!email || !password)
+                const { username, password } = await body.json();
+                if (!username || !password)
                     throw new WebError("Missing fields", 400, "Faltan campos obligatorios");
-                const token = await this.Manager.Login(email, password);
+                const token = await this.Manager.Login(username, password);
                 context.response.body = { message: "Login successful", token };
 
             } catch (error: WebError | unknown) {

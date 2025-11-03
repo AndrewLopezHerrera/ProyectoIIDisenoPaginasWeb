@@ -10,9 +10,9 @@ class CreateAccount {
         this.Manager = manager;
         router.post("/api/v1/accounts", async (context: Context) => {
             try {
-                const body = await context.request.body;
+                const body = context.request.body;
                 const datos: Account = await body.json();
-                if (!datos.iduser || !datos.funds || !datos.idtypeaccount || !datos.idtypemoney)
+                if (!datos.iduser || !datos.idtypeaccount || !datos.idtypemoney)
                     throw new WebError("Missing fields", 400, "Faltan campos obligatorios");
                  await this.Manager.CreateAccount(datos);
                 context.response.body = { message: "Se ha creado exitosamente la cuenta" };

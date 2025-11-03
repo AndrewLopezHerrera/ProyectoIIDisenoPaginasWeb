@@ -21,10 +21,11 @@ class CardsCRUD {
      * @param card La tarjeta a crear.
      */
     public async CreateCard(card: Card): Promise<void> {
-        await this.Connection.queryObject<Card>(
+        const result = await this.Connection.queryObject<Card>(
             "CALL orbita.sp_cards_create($1, $2, $3, $4, $5, $6)",
             [card.numbercard, card.iban, card.iduser, card.pin, card.cvv, card.expdate]
         );
+        console.log(result.warnings[0]);
     }
 
     /**
@@ -47,10 +48,10 @@ class CardsCRUD {
      */
     public async GetCards(identification: string){
         const result = await this.Connection.queryObject<Card>(
-            "CALL orbita.sp_cards_get_by_user($1)",
+            "SELECT * FROM orbita.sp_get_cards_user($1)",
             [identification]
         );
-        return result;
+        return result.rows;
     }
 
     /**
@@ -60,9 +61,9 @@ class CardsCRUD {
      * @param endDate La fecha de fin.
      * @returns Los movimientos de la tarjeta en el rango de fechas.
      */
-    public async GetCardMovements(numberCard: string, startDate: Date, endDate: Date){
+    public async GetCardMovements(numberCard: string, startDate: Date | null, endDate: Date | null){
         const result = await this.Connection.queryObject<Movement>(
-            "SELECT orbita.sp_card_movements_list($1, $2, $3)",
+            "SELECT * FROM orbita.sp_card_movements_list($1, $2, $3)",
             [numberCard, startDate, endDate]
         );
         return result.rows;

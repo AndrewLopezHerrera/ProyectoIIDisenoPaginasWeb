@@ -8,7 +8,7 @@ interface User {
     email: string;
     phone: string;
     password: string;
-    idusertype: number;
+    iduser: number;
     idtypeident: number;
 }
 

@@ -24,7 +24,7 @@ class Authorizer {
         const payload: Payload = {
             id: user.identification,
             email: user.email,
-            role: user.idusertype == 2 ? "administrator" : "user"
+            role: user.iduser == 2 ? "administrator" : "user"
         };
         return await this.jwtGenerator.Generate(payload);
     }
@@ -83,6 +83,11 @@ class Authorizer {
     public async GetUserIdFromToken(jwt: string): Promise<string> {
         const payload = await this.GetDataFromToken(jwt);
         return payload.id as string;
+    }
+
+    public async GetEmailFromToken(jwt: string): Promise<string> {
+        const payload = await this.GetDataFromToken(jwt);
+        return payload.email as string;
     }
 }
 

@@ -10,7 +10,7 @@ class CreateUser {
         this.Manager = manager;
         router.post("/api/v1/users", async (context: Context) => {
             try {
-                const body = await context.request.body;
+                const body = context.request.body;
                 const user: User = await body.json();
                 if (!user.username || !user.email || !user.password)
                     throw new WebError("Missing fields", 400, "Faltan campos obligatorios");
