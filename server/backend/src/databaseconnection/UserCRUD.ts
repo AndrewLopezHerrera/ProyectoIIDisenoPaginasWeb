@@ -61,14 +61,22 @@ class UserCRUD {
      * @param data Los nuevos datos del usuario.
      */
     public async UpdateUser(data: User): Promise<void> {
-        await this.Connection.queryObject("CALL public.sp_actualizar_usuario($1, $2, $3, $4)",
+        const result = await this.Connection.queryObject("CALL orbita.sp_users_update($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
             [
                 data.identification,
+                data.username,
+                data.name,
+                data.lastnameone,
+                data.lastnametwo,
+                data.borndate,
                 data.email,
                 data.phone,
-                data.password
+                data.password,
+                data.iduser,
+                data.idtypeident
             ]
         );
+        console.log(result.warnings[0].message);
     }
 
     /**
@@ -76,9 +84,10 @@ class UserCRUD {
      * @param identification El número de identificación del usuario a eliminar.
      */
     public async DeleteUser(identification: string): Promise<void> {
-        await this.Connection.queryObject("CALL public.sp_eliminar_usuario($1)",
+        const result = await this.Connection.queryObject("CALL orbita.sp_users_delete($1)",
             [identification]
         );
+        console.log(result.warnings[0].message);
     }
 }
 

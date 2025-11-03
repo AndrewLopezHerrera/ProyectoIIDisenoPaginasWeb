@@ -38,7 +38,7 @@ class UserManager {
         if(!await this.AuthorizerUsers.IsAdministrador(jwt) || !await this.AuthorizerUsers.IsOwner(jwt, user.identification)){
             throw new WebError("No autorizado a realizar esta acción", 403);
         }
-        await this.Connection.DeleteUser(username);
+        await this.Connection.DeleteUser(user.identification);
     }
 
     /**
@@ -51,7 +51,10 @@ class UserManager {
         if(!await this.AuthorizerUsers.IsAdministrador(jwt) || !await this.AuthorizerUsers.IsOwner(jwt, user.identification)){
             throw new WebError("No autorizado a realizar esta acción", 403);
         }
-        this.Connection.UpdateUser(data);
+        user.email = data.email ? data.email : user.email;
+        user.phone = data.phone ? data.phone : user.phone;
+        user.password = data.password ? data.password : user.password;
+        await this.Connection.UpdateUser(user);
     }
 
     /**

@@ -8,11 +8,11 @@ class ValidateAccountCRUD {
     }
 
     public async ValidateAccountExistence(accountNumber: string): Promise<boolean> {
-        const result = await this.Connection.queryObject<{ exists: boolean }>(
-            "SELECT orbita.fn_validate_iban($1);",
+        const result = await this.Connection.queryObject<boolean>(
+            "SELECT * FROM orbita.fn_validate_iban($1);",
             [accountNumber]
         );
-        return result.rows[0].exists;
+        return result.rows[0];
     }
 }
 
